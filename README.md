@@ -12,4 +12,5 @@ des Projektes auf dem PC navigieren.
 Im Anschluss in der einen Konsole mit "npm run srv" den nodejs Server starten
 Als nächstes in der zweiten Konsole mit "npm run web" den Webserver starten
 
+
 Das Team
