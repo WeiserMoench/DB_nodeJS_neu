@@ -1,0 +1,16 @@
+<mvc:View controllerName="de.htwberlin.adbkt.basic1.controller.Db" xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:c="sap.ui.commons"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core">
+	<Page id="db" title="DB kommunication" class="sapUiResponsiveContentPadding" showNavButton="true" navButtonPress="onNavBack">
+		<content>
+			<VBox>
+				<HBox>
+					<Button text="Read from DB" press="onButton1Press"/>
+					<Button text="Delete DB rows" press="onButton3Press"/>
+					<Button text="Import to DB" press="onButton2Press"/>
+				</HBox>
+				<Input id="dbid" width="80px" value="1"/>
+				<TextArea id="log" value="leer" width="12cm" rows="15"/>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>
