@@ -168,3 +168,161 @@ app.get('/importVBB', (req, res, next) => {
     console.log("ImportVBB wurde aufgerufen")
 });
 
+
+//Methode läd alle Verkehrsunternehmen des VBB Netzes herunter und fügt sie in die Datenbanktabelle "agency" im Benutzer U558587 ein
+
+// FEHLER ENTHALTEN
+
+app.get('/importVBBagency', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+
+    //var url = 'http://fiebelkorn24.de/stations.csv';
+    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
+    //var url = 'http://fiebelkorn24.de/data.csv'
+    var url = 'http://fiebelkorn24.de/agency.txt';
+    request.get(url , function (error, response, body) { //
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ',',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.agency VALUES (?,?,?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportVBBagency wurde aufgerufen")
+});
+
+
+//Methode läd alle trips des VBB Netzes herunter und fügt sie in die Datenbanktabelle "trips" im Benutzer U558587 ein
+app.get('/importVBBtrips', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+
+    //var url = 'http://fiebelkorn24.de/stations.csv';
+    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
+    //var url = 'http://fiebelkorn24.de/data.csv'
+    var url = 'http://fiebelkorn24.de/trips.txt';
+    request.get(url , function (error, response, body) { //
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ',',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.trips VALUES (?,?,?,?,?,?,?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportVBBtrips wurde aufgerufen")
+});
+
+
+//Methode läd alle Routen des VBB Netzes herunter und fügt sie in die Datenbanktabelle "routes" im Benutzer U558587 ein
+app.get('/importVBBroutes', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+
+    //var url = 'http://fiebelkorn24.de/stations.csv';
+    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
+    //var url = 'http://fiebelkorn24.de/data.csv'
+    var url = 'http://fiebelkorn24.de/routes.txt';
+    request.get(url , function (error, response, body) { //
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ',',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.routes VALUES (?,?,?,?,?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportVBBroutes wurde aufgerufen")
+});
