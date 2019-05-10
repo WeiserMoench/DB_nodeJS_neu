@@ -326,3 +326,56 @@ app.get('/importVBBroutes', (req, res, next) => {
 
     console.log("ImportVBBroutes wurde aufgerufen")
 });
+
+
+
+//Methode läd alle Shapes des VBB Netzes herunter und fügt sie in die Datenbanktabelle "shapes" im Benutzer U558587 ein
+app.get('/importVBBshapes', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+
+    //var url = 'http://fiebelkorn24.de/stations.csv';
+    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
+    //var url = 'http://fiebelkorn24.de/data.csv'
+    var url = 'http://fiebelkorn24.de/shapes.txt';
+    request.get(url , function (error, response, body) { //
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ',',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.shapes (shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence) VALUES (?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportVBBshapes wurde aufgerufen")
+});
