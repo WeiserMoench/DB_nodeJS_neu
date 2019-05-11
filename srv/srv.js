@@ -330,6 +330,8 @@ app.get('/importVBBroutes', (req, res, next) => {
 
 
 //Methode läd alle Shapes des VBB Netzes herunter und fügt sie in die Datenbanktabelle "shapes" im Benutzer U558587 ein
+// bei benutzung muss die Methode mehrfach ausgeführt werden und dabei immer die Nummer im datei namen von 1 an um je 1
+// erhört werden und das bis ziffer 6
 app.get('/importVBBshapes', (req, res, next) => {
 
     const parse = require('csv-parse');
@@ -339,7 +341,7 @@ app.get('/importVBBshapes', (req, res, next) => {
     //var url = 'http://fiebelkorn24.de/stations.csv';
     //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
     //var url = 'http://fiebelkorn24.de/data.csv'
-    var url = 'http://fiebelkorn24.de/shapes.txt';
+    var url = 'http://fiebelkorn24.de/shapes6.txt';
     request.get(url , function (error, response, body) { //
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
