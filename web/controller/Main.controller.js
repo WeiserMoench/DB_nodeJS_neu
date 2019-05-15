@@ -28,6 +28,9 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController"], function 
 		onPressDb: function (oEvent) {
 			this.getRouter().navTo("db");
 		},
+		onPressAufgabe3: function (oEvent) {
+			this.getRouter().navTo("aufgabe3");
+		},
 
 	});
 

@@ -1,0 +1,32 @@
+<mvc:View controllerName="de.htwberlin.adbkt.basic1.controller.Aufgabe3" xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:c="sap.ui.commons"
+	xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core">
+	<Page id="aufgabe3" title="{i18n>ownOutboundTitle}" class="sapUiResponsiveContentPadding" showNavButton="true" navButtonPress="onNavBack">
+		<content>
+			<VBox>
+				<!-- Form zur User Eingabe -->
+				<List headerText="Start und Ziel Eingabe">
+					<!--<InputListItem label="Kraftstofftyp">
+						<Select id="fueltype">
+							<core:Item key="all" text="Alle"/>
+							<core:Item key="e5" text="E5"/>
+							<core:Item key="e10" text="E10"/>
+							<core:Item key="diesel" text="Diesel"/>
+						</Select>
+					</InputListItem>-->
+					<InputListItem label="Startadresse">
+						<Input id="startadresse" placeholder="Startadresse" value="Treskowallee 8, Berlin"/>
+					</InputListItem>
+					<InputListItem label="Zieladresse">
+						<Input id="zieladresse" placeholder="Zieladresse" value="Alexanderplatz"/>
+					</InputListItem>
+					<InputListItem label="Los">
+						<Button text="Los!" press="onFindButtonPress"/>
+					</InputListItem>
+				</List>
+				<TextArea id="log" value="leer" width="10cm" rows="8"/>
+				<!-- Here Map Container -->
+				<HBox id="map" fitContainer="true" height="500px"></HBox>
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>

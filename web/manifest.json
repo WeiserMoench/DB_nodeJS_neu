@@ -127,6 +127,10 @@
 					"pattern": "db",
 					"name": "db",
 					"target": "db"
+				}, {
+					"pattern": "aufgabe3",
+					"name": "aufgabe3",
+					"target": "aufgabe3"
 				}
 
 			],
@@ -174,6 +178,11 @@
 				"db": {
 					"viewId": "db",
 					"viewName": "Db",
+					"viewLevel": 1
+				},
+				"aufgabe3": {
+					"viewId": "aufgabe3",
+					"viewName": "Aufgabe3",
 					"viewLevel": 1
 				}
 			}
