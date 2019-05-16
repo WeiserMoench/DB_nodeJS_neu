@@ -10,6 +10,7 @@
 				<Button width="5cm" text="Outbound" press="onPressOutbound"/>
 				<Button width="5cm" text="Own Outbound" press="onPressOutbound2"/>
 				<Button width="5cm" text="DB" press="onPressDb"/>
+				<Button width="5cm" text="Aufgabe 3" press="onPressAufgabe3"/>
 			</VBox>
 		</content>
 	</Page>
