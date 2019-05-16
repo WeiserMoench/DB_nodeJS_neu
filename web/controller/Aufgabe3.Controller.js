@@ -3,7 +3,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 ], function (BaseController, Cred) {
 	"use strict";
 
-	return BaseController.extend("de.htwberlin.adbkt.basic1.controller.Aufgabe3", {
+	return BaseController.extend("de.htwberlin.adbkt.basic1.controller.aufgabe3", {
 		onInit: function () {
 
 		},
