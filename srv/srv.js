@@ -168,3 +168,49 @@ app.get('/importVBB', (req, res, next) => {
     console.log("ImportVBB wurde aufgerufen")
 });
 
+//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+app.get('/importBerlin', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+    var url = 'http://fiebelkorn24.de/BerlinerUSStationen.csv';
+    request.get(url , function (error, response, body) { //
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ';',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.Nodes VALUES (?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportBerlin wurde aufgerufen")
+});
