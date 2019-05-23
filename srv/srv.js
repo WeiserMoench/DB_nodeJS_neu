@@ -45,6 +45,28 @@ app.get('/tanka', (req, res, next) => {
 
 });
 
+//diese Methode fragt bei der Datenbank die zurück zu legende Route ab
+app.get('/route', (req, res, next) => {
+    const sql = ``;
+    var latStart = req.query.latStart;
+    var lngStart = req.query.lngStart;
+    var latStop = req.query.latStop;
+    var lngStop = req.query.lngStop;
+    console.log(`latStart: ${latStart}`);
+    console.log(`lngStart: ${lngStart}`);
+    console.log(`latStop: ${latStop}`);
+    console.log(`lngStop: ${lngStop}`);
+    params =[];
+    db.readFromHdb(
+        config.hdb,
+        sql,
+        params,
+        rows => res.type('application/json').send(rows),
+        info => console.log(info)
+    );
+
+});
+
 app.get('/mult', (req, res, next) => {
     res.send(`${req.query.num1 * req.query.num2}`);
 });

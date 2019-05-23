@@ -10,9 +10,8 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 		onFindButtonPress: function (oEvent) {
 			sap.m.MessageToast.show('Die Streckensuche wird durchgeführt.. ');
 
-			//var fueltype = this.getView().byId('fueltype').getSelectedKey();
-			var address = this.getView().byId('address').getValue();
-			var distance = this.getView().byId('distance').getValue();
+			var startadresse = this.getView().byId('startadresse').getValue();
+			var zieladresse = this.getView().byId('zieladresse').getValue();
 
 			self = this;
 
@@ -23,16 +22,42 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 				dataType: 'jsonp',
 				jsonp: 'jsoncallback',
 				data: {
-					searchtext: address,
+					searchtext: startadresse,
 					app_id: Cred.getHereAppId(),
 					app_code: Cred.getHereAppCode(),
 					gen: '9'
 				},
 				success: function (data) {
-					var lat = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-					var lng = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+					var latStart = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+					var lngStart = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
 
-					self.requestTankstellenUmkreisSuche(lat, lng, distance);
+
+					$.ajax({
+						url: 'https://geocoder.api.here.com/6.2/geocode.json',
+						type: 'GET',
+						dataType: 'jsonp',
+						jsonp: 'jsoncallback',
+						data: {
+							searchtext: zieladresse,
+							app_id: Cred.getHereAppId(),
+							app_code: Cred.getHereAppCode(),
+							gen: '9'
+						},
+						success: function (data) {
+							var latStop = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+							var lngStop = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+
+
+							alert("Start: " + latStart + " " + lngStart + "\nStop: " + latStop + " " + lngStop);
+
+							self.requestFahrroute(latStart, lngStart, latStop, lngStop);
+
+
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+						}
+					})
 
 					//alert("test" + lat + " " + lng);
 				},
@@ -42,15 +67,14 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			});
 		},
 
-		requestTankstellenUmkreisSuche: function (lat, lng, distance) {
+		requestFahrroute: function (latStart, lngStart, latStop, lngStop) {
 			var log = self.getView().byId('log');
 
-			sap.m.MessageToast.show(lat + '\n' + lng);
+			//sap.m.MessageToast.show(lat + '\n' + lng);
 			self = this;
 			$.ajax({
 
-				//url: 'http://127.0.0.1:3000/tanka?lat=${13.301201000000000}&lng=${13.301201000000000}&dismeter=${disMeter}',//&lng=${13.301201000000000}&dismeter=${disMeter}
-				url: `http://127.0.0.1:3000/tanka?lat=${lat}&lng=${lng}&distance=${distance}`,
+				url: `http://127.0.0.1:3000/route?latStart=${latStart}&lngStart=${lngStart}&latStop=${latStop}&lngStop=${lngStop}`,
 				type: 'GET',
 
 				success: function (data) {
