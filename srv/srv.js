@@ -40,7 +40,7 @@ app.get('/tanka', (req, res, next) => {
         sql,
         params,
         rows => res.type('application/json').send(rows),
-        info => console.log(info)
+        info => console.log("Test 1")
     );
 
 });
@@ -133,7 +133,7 @@ app.get('/import', (req, res, next) => {
     });
 
 
-    console.log("Import wurde aufgerufen")
+    console.log("Import_Tankstellen wurde aufgerufen")
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
@@ -149,7 +149,7 @@ app.get('/importVBB', (req, res, next) => {
     //var url = 'http://fiebelkorn24.de/stations.csv';
     //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
     //var url = 'http://fiebelkorn24.de/data.csv'
-    var url = 'http://fiebelkorn24.de/stops.txt';
+    var url = 'http://127.0.0.1/stops.txt';
     request.get(url , function (error, response, body) { //
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
@@ -196,7 +196,69 @@ app.get('/importBerlin', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-    var url = 'http://fiebelkorn24.de/BerlinerUSStationen.csv';
+    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
+    var url = 'http://graphics.cs.uni-magdeburg.de/misc/BerlinerUSStationen.csv';
+    request.get(url , function (error, response, body) { //
+        if (error) { console.log("error line 201") }
+        console.log("status code " + response.statusCode)
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+
+            // var sql = 'Insert into u558587.Nodes (\"stop_name\", \"stop_lat\", \"stop_long\") VALUES (\'test2\',\'test2\',\'test2\')';
+            // var params = [];
+
+            // db.writeIntoHdb(
+            //     config.hdb,
+            //     sql,
+            //     params,
+            // )
+
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ';',
+                    trim: true,
+                    skip_empty_lines: true,
+                    from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.Nodes (\"stop_name\", \"stop_lat\", \"stop_long\", \"coordinate\") VALUES (?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportBerlin Nodes Tabelle wurde aufgerufen")
+});
+app.get('/importU_LINES', (req, res, next) => {
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+
+    //var url = 'http://127.0.0.1/stations.csv';
+    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
+    //var url = 'http://fiebelkorn24.de/data.csv'
+    var url = 'http://127.0.0.1/u_bahn_linien.xls';
     request.get(url , function (error, response, body) { //
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
@@ -218,7 +280,7 @@ app.get('/importBerlin', (req, res, next) => {
                 })
                 .on('end', function(){
 
-                    var sql = 'Insert into U558587.Nodes VALUES (?,?,?,?)';
+                    var sql = 'Insert into U558587.U_LINES (U_Haltestelle) VALUES (?)';
                     console.log(`output: ${output}`);
                     var params = output;
 
@@ -234,5 +296,5 @@ app.get('/importBerlin', (req, res, next) => {
     });
 
 
-    console.log("ImportBerlin wurde aufgerufen")
+    console.log("ImportU_LINES wurde aufgerufen")
 });

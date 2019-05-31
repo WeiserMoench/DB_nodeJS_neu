@@ -87,5 +87,21 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 			});
 		},
+		onButton2Press: function (oEvent) {
+			sap.m.MessageToast.show('Import Nodes ... ');
+			//self = this;
+			$.ajax({
+				url: `http://127.0.0.1:3000/importBerlin`,
+				type: 'GET',
+				success: function () {
+					var log = self.getView().byId('log');
+					log.setValue(JSON.stringify("DB reloaded"));
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					//sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+				}
+			});
+			log.setValue("erfolgreich importiert");
+		},
 	});
 });
