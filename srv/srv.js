@@ -212,7 +212,7 @@ app.get('/importBerlin', (req, res, next) => {
                     delimiter: ';',
                     trim: true,
                     skip_empty_lines: true,
-                    from_line: 2
+                    //from_line: 2
                 })
                 .on('readable', function(){
                     let record
@@ -251,7 +251,7 @@ app.get('/importEdges', (req, res, next) => {
     var request = require('request');
 
     // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
-    var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien.xls';
+    var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien.txt';
     request.get(url , function (error, response, body) { //
         if (error) { console.log("error line 201") }
         console.log("status code " + response.statusCode)
@@ -266,7 +266,7 @@ app.get('/importEdges', (req, res, next) => {
                     delimiter: ';',
                     trim: true,
                     skip_empty_lines: true,
-                    from_line: 1
+                    from_line: 2
                 })
                 .on('readable', function(){
                     let record
