@@ -266,7 +266,7 @@ app.get('/importEdges', (req, res, next) => {
                     delimiter: ';',
                     trim: true,
                     skip_empty_lines: true,
-                    from_line: 2
+                    from_line: 1
                 })
                 .on('readable', function(){
                     let record
@@ -283,24 +283,39 @@ app.get('/importEdges', (req, res, next) => {
                   for (i=1; i<len; i++) {
                     // console.log (output[i]);
 
+                    var line = output[i][0];
+
+
                     const len_j=output[i].length;
                     let j;
                     for(j=1; j < output[i].length-1; j++){
                       if( output[i][j+1].length > 0) {
 
+                        console.log(line + " : '" + output[i][j] + "' -> '" + output[i][j+1] + "'.");
+
                         //synchrone DB-Connection, um node_id als Ergebnis zu erhalten (Blocking Aufruf)
                         var sql_str1 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
-                        result1 = connection.exec( sql_str1, []);
+                        var result1 = connection.exec( sql_str1, []);
+                        console.log(sql_str1)
 
                         var sql_str2 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j+1] +"%' LIMIT 1";
-                        result2 = connection.exec( sql_str2, []);
+                        var result2 = connection.exec( sql_str2, []);
 
-                        console.log( JSON.stringify( result1) + " -> " + JSON.stringify( result2));
-                        console.log(output[i][j] + " -> " + output[i][j+1])
+                        console.log( line + " : " + JSON.stringify( result1) + " -> " + JSON.stringify( result2));
+                        console.log(line + " : " + output[i][j] + " -> " + output[i][j+1]);
+
+                        if( result1.length > 0) {
+
+                          console.log( line + " : " + JSON.stringify( result1[0]["node_ID"]) + " -> " + JSON.stringify( result2[0]["node_ID"]));
+
+                          var sql_insert = "Insert into U558587.Edges ( \"start\", \"end\", \"line\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "')";
+                          result_insert = connection.exec( sql_insert);
+                        }
                       }
                     }
                   }
 
+                  console.log("Dataimport edges completed");
                   connection.disconnect();
                     // var sql = 'Insert into U558587.Edges (\"start\", \"end\", \"line\") VALUES (?,?,?)';
                     // console.log(`output: ${output}`);
@@ -316,10 +331,8 @@ app.get('/importEdges', (req, res, next) => {
 
         }
     });
-    // Jetzt kannst Du die innerste Schleife so umbauen, dass Du immer Paare von aufeinanderfolgenden
-    // Stationen hast und er keinen Fehler generiert, wenn es eine Endstation ist.
 
-    console.log( sql_res)
+    //console.log( sql_res)
 
     console.log("Import Edges Tabelle wurde aufgerufen")
 });
