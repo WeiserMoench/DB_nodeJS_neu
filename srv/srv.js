@@ -241,37 +241,6 @@ app.get('/importBerlin', (req, res, next) => {
     console.log("ImportBerlin Nodes Tabelle wurde aufgerufen")
 });
 
-function testDBConnection() {
-  //
-  // const hanaClient = require("@sap/hana-client");
-  // const connection = hanaClient.createConnection();
-
-  connection.connect( config.hdb, (err) => {
-      if (err) {
-          return console.error("Connection error", err);
-      }
-
-      var client = req.db;
-      client.prepare(
-      	"SELECT * FROM U558587.Nodes",  //\"DUMMY\" ",
-      	function(err, statement) {
-      		if (err) {
-      			res.type("text/plain").status(500).send("ERROR: " + err.toString());	return;	}
-      	statement.exec([],
-      		function(err, results) {
-      			if (err) {
-      				res.type("text/plain").status(500).send("ERROR: " + err.toString());	return;
-
-      		} else {
-      			var result = JSON.stringify({ Objects: results});
-      			res.type("application/json").status(200).send(result);
-      		}
-      		});
-      	});
-      });
-};
-
-
 //Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
 app.get('/importEdges', (req, res, next) => {
 
@@ -319,6 +288,7 @@ app.get('/importEdges', (req, res, next) => {
                     for(j=1; j < output[i].length-1; j++){
                       if( output[i][j+1].length > 0) {
 
+                        //synchrone DB-Connection, um node_id als Ergebnis zu erhalten (Blocking Aufruf)
                         var sql_str1 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
                         result1 = connection.exec( sql_str1, []);
 
