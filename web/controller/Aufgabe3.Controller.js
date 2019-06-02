@@ -101,7 +101,23 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 					//sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
 				}
 			});
-			log.setValue("erfolgreich importiert");
+			log.setValue("Tabelle nodes erfolgreich importiert");
+		},
+		onButton3Press: function (oEvent) {
+			sap.m.MessageToast.show('Import edges ... ');
+			//self = this;
+			$.ajax({
+				url: `http://127.0.0.1:3000/importEdges`,
+				type: 'GET',
+				success: function () {
+					var log = self.getView().byId('log');
+					log.setValue(JSON.stringify("Edge data imported"));
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					//sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+				}
+			});
+			log.setValue("Tabelle edges erfolgreich importiert");
 		},
 	});
 });

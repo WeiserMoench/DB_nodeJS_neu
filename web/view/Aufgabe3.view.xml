@@ -24,7 +24,8 @@
 					</InputListItem>
 				</List>
 				<TextArea id="log" value="leer" width="10cm" rows="8"/>
-				<HBox><Button text="Reload DB" press="onButton2Press"/></HBox>
+				<HBox><Button text="Import Nodes" press="onButton2Press"/></HBox>
+				<HBox><Button text="Import Edges" press="onButton3Press"/></HBox>
 				<!-- Here Map Container -->
 				<HBox id="map" fitContainer="true" height="500px"></HBox>
 			</VBox>

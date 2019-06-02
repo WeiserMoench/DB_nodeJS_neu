@@ -204,15 +204,6 @@ app.get('/importBerlin', (req, res, next) => {
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
 
-            // var sql = 'Insert into u558587.Nodes (\"stop_name\", \"stop_lat\", \"stop_long\") VALUES (\'test2\',\'test2\',\'test2\')';
-            // var params = [];
-
-            // db.writeIntoHdb(
-            //     config.hdb,
-            //     sql,
-            //     params,
-            // )
-
             var csv = body;
             const output = []
             parse(
@@ -249,19 +240,55 @@ app.get('/importBerlin', (req, res, next) => {
 
     console.log("ImportBerlin Nodes Tabelle wurde aufgerufen")
 });
-app.get('/importU_LINES', (req, res, next) => {
+
+function testDBConnection() {
+  //
+  // const hanaClient = require("@sap/hana-client");
+  // const connection = hanaClient.createConnection();
+
+  connection.connect( config.hdb, (err) => {
+      if (err) {
+          return console.error("Connection error", err);
+      }
+
+      var client = req.db;
+      client.prepare(
+      	"SELECT * FROM U558587.Nodes",  //\"DUMMY\" ",
+      	function(err, statement) {
+      		if (err) {
+      			res.type("text/plain").status(500).send("ERROR: " + err.toString());	return;	}
+      	statement.exec([],
+      		function(err, results) {
+      			if (err) {
+      				res.type("text/plain").status(500).send("ERROR: " + err.toString());	return;
+
+      		} else {
+      			var result = JSON.stringify({ Objects: results});
+      			res.type("application/json").status(200).send(result);
+      		}
+      		});
+      	});
+      });
+};
+
+
+//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+app.get('/importEdges', (req, res, next) => {
+
+    const hanaClient = require("@sap/hana-client");
+    const connection = hanaClient.createConnection();
 
     const parse = require('csv-parse');
     var request = require('request');
 
-
-    //var url = 'http://127.0.0.1/stations.csv';
-    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
-    //var url = 'http://fiebelkorn24.de/data.csv'
-    var url = 'http://127.0.0.1/u_bahn_linien.xls';
+    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
+    var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien.xls';
     request.get(url , function (error, response, body) { //
+        if (error) { console.log("error line 201") }
+        console.log("status code " + response.statusCode)
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
+
             var csv = body;
             const output = []
             parse(
@@ -280,21 +307,49 @@ app.get('/importU_LINES', (req, res, next) => {
                 })
                 .on('end', function(){
 
-                    var sql = 'Insert into U558587.U_LINES (U_Haltestelle) VALUES (?)';
-                    console.log(`output: ${output}`);
-                    var params = output;
+                  connection.connect(config.hdb);
 
-                    db.writeIntoHdb(
-                        config.hdb,
-                        sql,
-                        params,
-                    )
+                  const len = output.length;
+                  let i;
+                  for (i=1; i<len; i++) {
+                    // console.log (output[i]);
+
+                    const len_j=output[i].length;
+                    let j;
+                    for(j=1; j < output[i].length-1; j++){
+                      if( output[i][j+1].length > 0) {
+
+                        var sql_str1 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
+                        result1 = connection.exec( sql_str1, []);
+
+                        var sql_str2 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j+1] +"%' LIMIT 1";
+                        result2 = connection.exec( sql_str2, []);
+
+                        console.log( JSON.stringify( result1) + " -> " + JSON.stringify( result2));
+                        console.log(output[i][j] + " -> " + output[i][j+1])
+                      }
+                    }
+                  }
+
+                  connection.disconnect();
+                    // var sql = 'Insert into U558587.Edges (\"start\", \"end\", \"line\") VALUES (?,?,?)';
+                    // console.log(`output: ${output}`);
+                    // var params = output;
+                    //
+                    // db.writeIntoHdb(
+                    //     config.hdb,
+                    //     sql,
+                    //     params,
+                    // )
 
                 })
 
         }
     });
+    // Jetzt kannst Du die innerste Schleife so umbauen, dass Du immer Paare von aufeinanderfolgenden
+    // Stationen hast und er keinen Fehler generiert, wenn es eine Endstation ist.
 
+    console.log( sql_res)
 
-    console.log("ImportU_LINES wurde aufgerufen")
+    console.log("Import Edges Tabelle wurde aufgerufen")
 });
