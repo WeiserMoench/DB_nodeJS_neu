@@ -40,7 +40,7 @@ app.get('/tanka', (req, res, next) => {
         sql,
         params,
         rows => res.type('application/json').send(rows),
-        info => console.log(info)
+        info => console.log("Test 1")
     );
 
 });
@@ -133,7 +133,7 @@ app.get('/import', (req, res, next) => {
     });
 
 
-    console.log("Import wurde aufgerufen")
+    console.log("Import_Tankstellen wurde aufgerufen")
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
@@ -149,7 +149,7 @@ app.get('/importVBB', (req, res, next) => {
     //var url = 'http://fiebelkorn24.de/stations.csv';
     //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
     //var url = 'http://fiebelkorn24.de/data.csv'
-    var url = 'http://fiebelkorn24.de/stops.txt';
+    var url = 'http://127.0.0.1/stops.txt';
     request.get(url , function (error, response, body) { //
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
@@ -196,10 +196,68 @@ app.get('/importBerlin', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-    var url = 'http://fiebelkorn24.de/BerlinerUSStationen.csv';
+    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
+    var url = 'http://graphics.cs.uni-magdeburg.de/misc/BerlinerUSStationen.csv';
     request.get(url , function (error, response, body) { //
+        if (error) { console.log("error line 201") }
+        console.log("status code " + response.statusCode)
         if (!error && response.statusCode == 200) {
             console.log("Code 200");
+
+            var csv = body;
+            const output = []
+            parse(
+                csv
+                , {
+                    delimiter: ';',
+                    trim: true,
+                    skip_empty_lines: true,
+                    //from_line: 2
+                })
+                .on('readable', function(){
+                    let record
+                    while (record = this.read()) {
+                        output.push(record)
+                    }
+                })
+                .on('end', function(){
+
+                    var sql = 'Insert into U558587.Nodes (\"stop_name\", \"stop_lat\", \"stop_long\", \"coordinate\") VALUES (?,?,?,?)';
+                    console.log(`output: ${output}`);
+                    var params = output;
+
+                    db.writeIntoHdb(
+                        config.hdb,
+                        sql,
+                        params,
+                    )
+
+                })
+
+        }
+    });
+
+
+    console.log("ImportBerlin Nodes Tabelle wurde aufgerufen")
+});
+
+//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+app.get('/importEdges', (req, res, next) => {
+
+    const hanaClient = require("@sap/hana-client");
+    const connection = hanaClient.createConnection();
+
+    const parse = require('csv-parse');
+    var request = require('request');
+
+    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
+    var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien.txt';
+    request.get(url , function (error, response, body) { //
+        if (error) { console.log("error line 201") }
+        console.log("status code " + response.statusCode)
+        if (!error && response.statusCode == 200) {
+            console.log("Code 200");
+
             var csv = body;
             const output = []
             parse(
@@ -218,21 +276,63 @@ app.get('/importBerlin', (req, res, next) => {
                 })
                 .on('end', function(){
 
-                    var sql = 'Insert into U558587.Nodes VALUES (?,?,?,?)';
-                    console.log(`output: ${output}`);
-                    var params = output;
+                  connection.connect(config.hdb);
 
-                    db.writeIntoHdb(
-                        config.hdb,
-                        sql,
-                        params,
-                    )
+                  const len = output.length;
+                  let i;
+                  for (i=1; i<len; i++) {
+                    // console.log (output[i]);
+
+                    var line = output[i][0];
+
+
+                    const len_j=output[i].length;
+                    let j;
+                    for(j=1; j < output[i].length-1; j++){
+                      if( output[i][j+1].length > 0) {
+
+                        console.log(line + " : '" + output[i][j] + "' -> '" + output[i][j+1] + "'.");
+
+                        //synchrone DB-Connection, um node_id als Ergebnis zu erhalten (Blocking Aufruf)
+                        var sql_str1 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
+                        var result1 = connection.exec( sql_str1, []);
+                        console.log(sql_str1)
+
+                        var sql_str2 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j+1] +"%' LIMIT 1";
+                        var result2 = connection.exec( sql_str2, []);
+
+                        console.log( line + " : " + JSON.stringify( result1) + " -> " + JSON.stringify( result2));
+                        console.log(line + " : " + output[i][j] + " -> " + output[i][j+1]);
+
+                        if( result1.length > 0) {
+
+                          console.log( line + " : " + JSON.stringify( result1[0]["node_ID"]) + " -> " + JSON.stringify( result2[0]["node_ID"]));
+
+                          var sql_insert = "Insert into U558587.Edges ( \"start\", \"end\", \"line\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "')";
+                          result_insert = connection.exec( sql_insert);
+                        }
+                      }
+                    }
+                  }
+
+                  console.log("Dataimport edges completed");
+                  connection.disconnect();
+                    // var sql = 'Insert into U558587.Edges (\"start\", \"end\", \"line\") VALUES (?,?,?)';
+                    // console.log(`output: ${output}`);
+                    // var params = output;
+                    //
+                    // db.writeIntoHdb(
+                    //     config.hdb,
+                    //     sql,
+                    //     params,
+                    // )
 
                 })
 
         }
     });
 
+    //console.log( sql_res)
 
-    console.log("ImportBerlin wurde aufgerufen")
+    console.log("Import Edges Tabelle wurde aufgerufen")
 });
