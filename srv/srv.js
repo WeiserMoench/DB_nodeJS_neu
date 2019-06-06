@@ -196,8 +196,7 @@ app.get('/importBerlin', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
-    var url = 'http://graphics.cs.uni-magdeburg.de/misc/BerlinerUSStationen.csv';
+    var url = 'http://127.0.0.1:8081/ressources/S_U_Bahnhoefe_v2.csv';
     request.get(url , function (error, response, body) { //
         if (error) { console.log("error line 201") }
         console.log("status code " + response.statusCode)
@@ -212,7 +211,7 @@ app.get('/importBerlin', (req, res, next) => {
                     delimiter: ';',
                     trim: true,
                     skip_empty_lines: true,
-                    //from_line: 2
+                    from_line: 2
                 })
                 .on('readable', function(){
                     let record
@@ -250,8 +249,8 @@ app.get('/importEdges', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-    // var url = 'http://127.0.0.1:3000/BerlinerUSStationen.csv';
-    var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien.txt';
+    var url = 'http://127.0.0.1:8081/ressources/linien/s_bahn_linien.txt';
+  //  var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien_neu.txt';
     request.get(url , function (error, response, body) { //
         if (error) { console.log("error line 201") }
         console.log("status code " + response.statusCode)
@@ -265,8 +264,10 @@ app.get('/importEdges', (req, res, next) => {
                 , {
                     delimiter: ';',
                     trim: true,
+                    //rtrim: true,
+                    skip_lines_with_error: true,
                     skip_empty_lines: true,
-                    from_line: 2
+                    from_line: 1
                 })
                 .on('readable', function(){
                     let record
@@ -275,13 +276,15 @@ app.get('/importEdges', (req, res, next) => {
                     }
                 })
                 .on('end', function(){
+                    console.log("Test Parser");
+                      console.log(output.length);
 
                   connection.connect(config.hdb);
 
                   const len = output.length;
                   let i;
                   for (i=1; i<len; i++) {
-                    // console.log (output[i]);
+                    console.log ("for-loop 1");
 
                     var line = output[i][0];
 
@@ -290,6 +293,7 @@ app.get('/importEdges', (req, res, next) => {
                     let j;
                     for(j=1; j < output[i].length-1; j++){
                       if( output[i][j+1].length > 0) {
+                          console.log("for-loop 2");
 
                         console.log(line + " : '" + output[i][j] + "' -> '" + output[i][j+1] + "'.");
 
@@ -304,7 +308,7 @@ app.get('/importEdges', (req, res, next) => {
                         console.log( line + " : " + JSON.stringify( result1) + " -> " + JSON.stringify( result2));
                         console.log(line + " : " + output[i][j] + " -> " + output[i][j+1]);
 
-                        if( result1.length > 0) {
+                        if( result1.length > 0 && result2.length) {
 
                           console.log( line + " : " + JSON.stringify( result1[0]["node_ID"]) + " -> " + JSON.stringify( result2[0]["node_ID"]));
 
