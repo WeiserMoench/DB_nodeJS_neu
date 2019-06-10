@@ -240,8 +240,7 @@ app.get('/importBerlin', (req, res, next) => {
     console.log("ImportBerlin Nodes Tabelle wurde aufgerufen")
 });
 
-//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
-app.get('/importEdges', (req, res, next) => {
+function importEdgeFromFile( url) {
 
     const hanaClient = require("@sap/hana-client");
     const connection = hanaClient.createConnection();
@@ -249,7 +248,7 @@ app.get('/importEdges', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-    var url = 'http://127.0.0.1:8081/ressources/linien/s_bahn_linien.txt';
+    // var url = 'http://127.0.0.1:8081/ressources/linien/s_bahn_linien.txt';
   //  var url = 'http://graphics.cs.uni-magdeburg.de/misc/s_bahn_linien_neu.txt';
     request.get(url , function (error, response, body) { //
         if (error) { console.log("error line 201") }
@@ -276,24 +275,19 @@ app.get('/importEdges', (req, res, next) => {
                     }
                 })
                 .on('end', function(){
-                    console.log("Test Parser");
-                      console.log(output.length);
 
                   connection.connect(config.hdb);
 
                   const len = output.length;
                   let i;
                   for (i=1; i<len; i++) {
-                    console.log ("for-loop 1");
 
                     var line = output[i][0];
-
 
                     const len_j=output[i].length;
                     let j;
                     for(j=1; j < output[i].length-1; j++){
                       if( output[i][j+1].length > 0) {
-                          console.log("for-loop 2");
 
                         console.log(line + " : '" + output[i][j] + "' -> '" + output[i][j+1] + "'.");
 
@@ -321,22 +315,23 @@ app.get('/importEdges', (req, res, next) => {
 
                   console.log("Dataimport edges completed");
                   connection.disconnect();
-                    // var sql = 'Insert into U558587.Edges (\"start\", \"end\", \"line\") VALUES (?,?,?)';
-                    // console.log(`output: ${output}`);
-                    // var params = output;
-                    //
-                    // db.writeIntoHdb(
-                    //     config.hdb,
-                    //     sql,
-                    //     params,
-                    // )
 
                 })
 
         }
     });
 
-    //console.log( sql_res)
+}
 
-    console.log("Import Edges Tabelle wurde aufgerufen")
+//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+app.get('/importEdges', (req, res, next) => {
+
+  importEdgeFromFile( 'http://127.0.0.1:8081/ressources/linien/s_bahn_linien.txt');
+  importEdgeFromFile( 'http://127.0.0.1:8081/ressources/linien/u_bahn_linien.txt');
+
+  console.log("Import Edges Tabelle wurde aufgerufen")
 });
+
+function shortest_path(){
+  
+}
