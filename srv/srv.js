@@ -306,7 +306,7 @@ function importEdgeFromFile( url) {
 
                           console.log( line + " : " + JSON.stringify( result1[0]["node_ID"]) + " -> " + JSON.stringify( result2[0]["node_ID"]));
 
-                          var sql_insert = "Insert into U558587.Edges ( \"start\", \"end\", \"line\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "')";
+                          var sql_insert = "Insert into U558587.Edges ( \"start\", \"end\", \"line\", \"start_name\", \"end_name\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "', '" + output[i][j] +"', '" + output[i][j+1] + "')";
                           result_insert = connection.exec( sql_insert);
                         }
                       }
@@ -333,5 +333,5 @@ app.get('/importEdges', (req, res, next) => {
 });
 
 function shortest_path(){
-  
+
 }
