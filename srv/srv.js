@@ -335,3 +335,18 @@ app.get('/importEdges', (req, res, next) => {
 function shortest_path(){
 
 }
+
+app.get('/test', (req, res, next) => {
+    const sql = `CALL TA_ANALYZE (DOCUMENT_TEXT => 'von Güntzelstr. 10 nach Treskowallee 8 Berlin', LANGUAGE_CODE=>?, 
+    MIME_TYPE => ?, LANGUAGE_DETECTION=>'DE', CONFIGURATION=>'EXTRACTION_CORE', RETURN_PLAINTEXT=>0, 
+    TA_ANNOTATIONS => ?, PLAINTEXT => ? );`;
+    params =[];
+    db.readFromHdb(
+        config.hdb,
+        sql,
+        params,
+        rows => res.type('application/json').send(rows),
+        info => console.log("Test 1")
+    );
+
+});
