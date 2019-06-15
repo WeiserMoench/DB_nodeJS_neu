@@ -5,6 +5,7 @@ const port = 3000
 const config = require('./config');
 const db = require('./db');
 
+
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -337,16 +338,29 @@ function shortest_path(){
 }
 
 app.get('/test', (req, res, next) => {
-    const sql = `CALL TA_ANALYZE (DOCUMENT_TEXT => 'von Güntzelstr. 10 nach Treskowallee 8 Berlin', LANGUAGE_CODE=>?, 
-    MIME_TYPE => ?, LANGUAGE_DETECTION=>'DE', CONFIGURATION=>'EXTRACTION_CORE', RETURN_PLAINTEXT=>0, 
-    TA_ANNOTATIONS => ?, PLAINTEXT => ? );`;
-    params =[];
-    db.readFromHdb(
-        config.hdb,
-        sql,
-        params,
-        rows => res.type('application/json').send(rows),
-        info => console.log("Test 1")
+    const hdb = require("@sap/hana-client");
+    var ta = require('sap-textanalysis');
+    var client;
+    async.series([
+        function connect(callback) {
+            client = hdb.createClient(options);
+            client.connect(callback);
+        },
+        function analyze(callback) {
+            var values = {
+                DOCUMENT_TEXT: '<!DOCTYPE html><html><body><p>My first paragraph.</p></body></html>',
+                LANGUAGE_CODE: 'DE',
+                CONFIGURATION: 'EXTRACTION_CORE',
+                RETURN_PLAINTEXT: 0
+            };
+            ta.analyze(values, client, function done(err, parameters, rows) {
+                if (err) { return console.error('error', err); }
+                callback();
+            });
+        },
+        function end(callback) {
+            client.end(callback);
+        }], done
     );
 
 });
