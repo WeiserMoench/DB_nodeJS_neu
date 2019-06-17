@@ -7,6 +7,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 		onInit: function () {
 
 		},
+
 		onFindButtonPress: function (oEvent) {
 			sap.m.MessageToast.show('Die Streckensuche wird durchgeführt.. ');
 
@@ -91,6 +92,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 			});
 		},
+
 		onButton2Press: function (oEvent) {
 			sap.m.MessageToast.show('Import Nodes ... ');
 			//self = this;
@@ -107,6 +109,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			});
 			log.setValue("Tabelle nodes erfolgreich importiert");
 		},
+
 		onButton3Press: function (oEvent) {
 			sap.m.MessageToast.show('Import edges ... ');
 			//self = this;
@@ -123,5 +126,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			});
 			log.setValue("Tabelle edges erfolgreich importiert");
 		},
+
+
 	});
 });
