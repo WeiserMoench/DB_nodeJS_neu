@@ -66,8 +66,8 @@ module.exports = {
                     var adress = [];
                     addressRows.forEach(function (row, index) {
                         adress.push(row.TOKEN);
-                        console.log(row.TOKEN);
-                        console.log(adress.length);
+                        //console.log(row.TOKEN);
+                        //console.log(adress.length);
                         //getGeoCoordinates(row.TOKEN);
                     });
                     connection.disconnect();

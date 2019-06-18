@@ -341,14 +341,20 @@ app.get('/textanalyse', (req, res, next) => {
     var eingabe = req.query.eingabe;
     var funktion = req.query.funktion;
     console.log(`Die Eingabe lautete: ${eingabe}`);
-    data=db.analyseTextAndGetAdressen(
+    var data;
+
+    data = db.analyseTextAndGetAdressen(
         config.hdb,
         funktion,
-       // ermittleKoordinaten(),
+        // ermittleKoordinaten(),
         eingabe,
         data => res.type('application/json').send(data),
         info => console.log(info)
-    );
+        );
+
+    data.forEach(function(item, index) {
+        console.log(item, index);
+    });
 
 });
 
