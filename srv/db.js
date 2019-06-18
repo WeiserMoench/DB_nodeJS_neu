@@ -71,7 +71,8 @@ module.exports = {
                         //getGeoCoordinates(row.TOKEN);
                     });
                     connection.disconnect();
-                    return adress;
+                    res = adress;
+                    //return adress;
                 }
 
             });

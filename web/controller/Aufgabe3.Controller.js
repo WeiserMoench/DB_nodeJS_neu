@@ -176,7 +176,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
         $.ajax({
 
-            url: `http://127.0.0.1:3000/textanalyse?eingabe=${eingabezeile}&funktion=${ermittleKoordinaten}`,
+            url: `http://127.0.0.1:3000/textanalyse?eingabe=${eingabezeile}`,//&funktion=${ermittleKoordinaten}`,
             type: 'GET',
 
             success: function (data) {
