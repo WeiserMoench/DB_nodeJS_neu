@@ -340,12 +340,26 @@ app.get('/testShortestPath', (req, res, next) => {
   const connection = hanaClient.createConnection();
   connection.connect(config.hdb);
 
-  var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => 187, END_NODE_ID => 5, EDGE_NAME => ?)";
+  var nodeid_start = 187;
+  var nodeid_end = 5;
+
+  var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => " + JSON.stringify(nodeid_start) + ", END_NODE_ID => " + JSON.stringify(nodeid_end) + ", EDGE_NAME => ?)";
   console.log(sql_str);
   var result = connection.exec( sql_str, []);
   console.log( JSON.stringify( result))
 
   connection.disconnect();
+
+  // find interchange stations
+  let i;
+  for (i=0; i<result.length-1; i++) {
+    var line = result[i]["line"];
+    console.log(line);
+    if( result[i]["line"] != result[i+1]["line"]){
+      console.log( "Changing from " + result[i]["line"] + " to " + result[i+1]["line"] + " at station " + result[i]["end_name"] );
+    }
+  }
+
 });
 
 app.get('/textanalyse', (req, res, next) => {
