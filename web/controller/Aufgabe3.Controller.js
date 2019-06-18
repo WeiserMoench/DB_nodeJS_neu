@@ -10,6 +10,10 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 		onFindButtonPress: function (oEvent) {
 			sap.m.MessageToast.show('Die Streckensuche wird durchgeführt.. ');
 
+			//var eingabe = this.getView().byId('eingabe').getValue();
+
+			//function Satz in Coordinaten wandeln und übergeben
+
 			var startadresse = this.getView().byId('startadresse').getValue();
 			var zieladresse = this.getView().byId('zieladresse').getValue();
 

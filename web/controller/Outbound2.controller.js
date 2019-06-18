@@ -51,6 +51,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 				//url: 'http://127.0.0.1:3000/tanka?lat=${13.301201000000000}&lng=${13.301201000000000}&dismeter=${disMeter}',//&lng=${13.301201000000000}&dismeter=${disMeter}
 				url: `http://127.0.0.1:3000/tanka?lat=${lat}&lng=${lng}&distance=${distance}`,
+				//url: `http://127.0.0.1:3000/test`,
 				type: 'GET',
 
 				success: function (data) {
