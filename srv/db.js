@@ -1,6 +1,6 @@
 const hanaClient = require("@sap/hana-client");
 const connection = hanaClient.createConnection();
-const ta = require("sap-textanalysis");
+const ta = require("@sap/textanalysis");
 
 module.exports = {
     readFromHdb: function (hdb, sql, params, handleRows, infoHandler) {
@@ -48,7 +48,7 @@ module.exports = {
                 return console.error("Connection error", err);
             }
             const values = {
-                DOCUMENT_TEXT: result.searchText,
+                DOCUMENT_TEXT: result,
                 LANGUAGE_CODE: 'DE',
                 CONFIGURATION: 'EXTRACTION_CORE',
                 RETURN_PLAINTEXT: 0
@@ -65,7 +65,8 @@ module.exports = {
                     connection.close();
                 } else {
                     addressRows.forEach(function (row, index) {
-                        getGeoCoordinates(index, row.TOKEN, result, type);
+                        console.log(row.TOKEN);
+                        getGeoCoordinates(row.TOKEN);
                     });
                 }
 

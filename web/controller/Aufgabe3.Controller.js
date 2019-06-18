@@ -10,15 +10,17 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 		onFindButtonPress: function (oEvent) {
 			sap.m.MessageToast.show('Die Streckensuche wird durchgeführt.. ');
+            self = this;
 
-			//var eingabe = this.getView().byId('eingabe').getValue();
+			const eingabe = this.getView().byId('eingabezeile').getValue();
 
-			//function Satz in Coordinaten wandeln und übergeben
+			//alert(eingabe)
 
-			var startadresse = this.getView().byId('startadresse').getValue();
+            self.requestFahrrouteEineEingabe(eingabe);
+
+/*			var startadresse = this.getView().byId('startadresse').getValue();
 			var zieladresse = this.getView().byId('zieladresse').getValue();
 
-			self = this;
 
 			//Geocoding
 			$.ajax({
@@ -55,7 +57,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 							alert("Start: " + latStart + " " + lngStart + "\nStop: " + latStop + " " + lngStop);
 
-							self.requestFahrroute(latStart, lngStart, latStop, lngStop);
+							self.requestFahrrouteZweiFelder(latStart, lngStart, latStop, lngStop);
 
 
 						},
@@ -69,10 +71,10 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 				error: function (jqXHR, textStatus, errorThrown) {
 					sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
 				}
-			});
+			});*/
 		},
 
-		requestFahrroute: function (latStart, lngStart, latStop, lngStop) {
+		requestFahrrouteZweiFelder: function (latStart, lngStart, latStop, lngStop) {
 			var log = self.getView().byId('log');
 
 			//sap.m.MessageToast.show(lat + '\n' + lng);
@@ -126,6 +128,72 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			});
 			log.setValue("Tabelle edges erfolgreich importiert");
 		},
+
+        requestFahrrouteEineEingabe: function (eingabezeile) {
+            //alert("FahrrouteEineEingabe aufgerufen");
+            self = this;
+
+            const ermittleKoordinaten = self.ermittleKoordinaten();
+
+            $.ajax({
+
+                url: `http://127.0.0.1:3000/textanalyse?eingabe=${eingabezeile}&funktion=${ermittleKoordinaten}`,
+                type: 'GET',
+
+                success: function (data) {
+
+                    var log = self.getView().byId('log');
+                    log.setValue(JSON.stringify(data, null, 2));
+
+                    /*$.ajax({
+
+                        url: `http://127.0.0.1:3000/route?latStart=${latStart}&lngStart=${lngStart}&latStop=${latStop}&lngStop=${lngStop}`,
+                        type: 'GET',
+
+                        success: function (data) {
+
+                            var log = self.getView().byId('log');
+                            log.setValue(JSON.stringify(data, null, 2));
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+                        }
+
+                    });*/
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+                }
+
+            });
+        },
+
+        ermittleKoordinaten: function(adresse){
+
+            $.ajax({
+                url: 'https://geocoder.api.here.com/6.2/geocode.json',
+                type: 'GET',
+                dataType: 'jsonp',
+                jsonp: 'jsoncallback',
+                data: {
+                    searchtext: adresse,
+                    app_id: Cred.getHereAppId(),
+                    app_code: Cred.getHereAppCode(),
+                    gen: '9'
+                },
+                success: function (data) {
+                    return data;
+
+                    alert("Daten erhalten");
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+                }
+            })
+
+        }
 
 
 	});

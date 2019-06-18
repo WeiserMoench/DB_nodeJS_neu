@@ -337,30 +337,16 @@ function shortest_path(){
 
 }
 
-app.get('/test', (req, res, next) => {
-    const hdb = require("@sap/hana-client");
-    var ta = require('sap-textanalysis');
-    var client;
-    async.series([
-        function connect(callback) {
-            client = hdb.createClient(options);
-            client.connect(callback);
-        },
-        function analyze(callback) {
-            var values = {
-                DOCUMENT_TEXT: '<!DOCTYPE html><html><body><p>My first paragraph.</p></body></html>',
-                LANGUAGE_CODE: 'DE',
-                CONFIGURATION: 'EXTRACTION_CORE',
-                RETURN_PLAINTEXT: 0
-            };
-            ta.analyze(values, client, function done(err, parameters, rows) {
-                if (err) { return console.error('error', err); }
-                callback();
-            });
-        },
-        function end(callback) {
-            client.end(callback);
-        }], done
+app.get('/textanalyse', (req, res, next) => {
+    var eingabe = req.query.eingabe;
+    var funktion = req.query.funktion;
+    console.log(`Die Eingabe lautete: ${eingabe}`);
+    db.analyseTextAndGetAdressen(
+        config.hdb,
+        funktion,
+        eingabe,
+        rows => res.type('application/json').send(rows),
+        info => console.log(info)
     );
 
 });
