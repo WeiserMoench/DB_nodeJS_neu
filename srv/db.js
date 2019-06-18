@@ -1,5 +1,6 @@
 const hanaClient = require("@sap/hana-client");
 const connection = hanaClient.createConnection();
+const ta = require("@sap/textanalysis");
 
 module.exports = {
     readFromHdb: function (hdb, sql, params, handleRows, infoHandler) {
@@ -34,6 +35,43 @@ module.exports = {
 
                 if (err) {
                     return console.error('SQL execute error:', err);
+                }
+
+            });
+        });
+    },
+
+    analyseTextAndGetAdressen: function (hdb, getGeoCoordinates, result, res, type) {
+        console.log("starting text analysis");
+        connection.connect(hdb, (err) => {
+            if (err) {
+                return console.error("Connection error", err);
+            }
+            const values = {
+                DOCUMENT_TEXT: result,
+                LANGUAGE_CODE: 'DE',
+                CONFIGURATION: 'EXTRACTION_CORE',
+                RETURN_PLAINTEXT: 0
+            };
+            ta.analyze(values, connection, function done(err, parameters, rows) {
+                if (err) {
+                    return console.error('error', err);
+                }
+                console.log("finished text analysis");
+                const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
+                if (addressRows.length != 2) {
+                    console.log(addressRows.length + " addresses were given. Only 2 allowed!")
+                    //res.type('application/json').send({message: 'Problem!'});
+                } else {
+                    var adress = [];
+                    addressRows.forEach(function (row, index) {
+                        adress.push(row.TOKEN);
+                        //console.log(row.TOKEN);
+                        //console.log(adress.length);
+                        //getGeoCoordinates(row.TOKEN);
+                    });
+                    connection.disconnect();
+                    return adress;
                 }
 
             });

@@ -347,30 +347,49 @@ app.get('/testShortestPath', (req, res, next) => {
   connection.disconnect();
 });
 
-app.get('/test', (req, res, next) => {
-    const hdb = require("@sap/hana-client");
-    var ta = require('sap-textanalysis');
-    var client;
-    async.series([
-        function connect(callback) {
-            client = hdb.createClient(options);
-            client.connect(callback);
-        },
-        function analyze(callback) {
-            var values = {
-                DOCUMENT_TEXT: '<!DOCTYPE html><html><body><p>My first paragraph.</p></body></html>',
-                LANGUAGE_CODE: 'DE',
-                CONFIGURATION: 'EXTRACTION_CORE',
-                RETURN_PLAINTEXT: 0
-            };
-            ta.analyze(values, client, function done(err, parameters, rows) {
-                if (err) { return console.error('error', err); }
-                callback();
-            });
-        },
-        function end(callback) {
-            client.end(callback);
-        }], done
-    );
+app.get('/textanalyse', (req, res, next) => {
+    var eingabe = req.query.eingabe;
+    var funktion = req.query.funktion;
+    console.log(`Die Eingabe lautete: ${eingabe}`);
+    var data;
+
+    data = db.analyseTextAndGetAdressen(
+        config.hdb,
+        funktion,
+        // ermittleKoordinaten(),
+        eingabe,
+        data => res.type('application/json').send(data),
+        info => console.log(info)
+        );
+
+    data.forEach(function(item, index) {
+        console.log(item, index);
+    });
 
 });
+
+function ermittleKoordinaten(adresse){
+
+    $.ajax({
+        url: 'https://geocoder.api.here.com/6.2/geocode.json',
+        type: 'GET',
+        dataType: 'jsonp',
+        jsonp: 'jsoncallback',
+        data: {
+            searchtext: adresse,
+            app_id: Cred.getHereAppId(),
+            app_code: Cred.getHereAppCode(),
+            gen: '9'
+        },
+        success: function (data) {
+            return data;
+
+            alert("Daten erhalten");
+
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+        }
+    })
+
+};

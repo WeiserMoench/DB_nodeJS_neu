@@ -5,19 +5,15 @@
 			<VBox>
 				<!-- Form zur User Eingabe -->
 				<List headerText="Start und Ziel Eingabe">
-					<!--<InputListItem label="Kraftstofftyp">
-						<Select id="fueltype">
-							<core:Item key="all" text="Alle"/>
-							<core:Item key="e5" text="E5"/>
-							<core:Item key="e10" text="E10"/>
-							<core:Item key="diesel" text="Diesel"/>
-						</Select>
-					</InputListItem>-->
+
 					<InputListItem label="Startadresse">
 						<Input id="startadresse" placeholder="Startadresse" value="Treskowallee 8, Berlin"/>
 					</InputListItem>
 					<InputListItem label="Zieladresse">
 						<Input id="zieladresse" placeholder="Zieladresse" value="Alexanderplatz, Berlin"/>
+					</InputListItem>
+					<InputListItem label="(AKTUELL NUR TESTBETRIEB)Eingabe von Start und Ziel (Beides muss sich innerhalb Berlins befinden)">
+						<Input id="eingabezeile" placeholder="Eingabezeile" value="Ich möchte von der Treskowallee 8 zur Wittenberger Str. 41"/>
 					</InputListItem>
 					<InputListItem label="Los">
 						<Button text="Los!" press="onFindButtonPress"/>
