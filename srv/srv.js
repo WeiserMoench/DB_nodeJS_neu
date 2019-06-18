@@ -4,6 +4,7 @@ const port = 3000
 
 const config = require('./config');
 const db = require('./db');
+//const Cred = require('web/Cred.js');
 
 
 app.use(function (req, res, next) {
@@ -348,25 +349,124 @@ app.get('/testShortestPath', (req, res, next) => {
 });
 
 app.get('/textanalyse', (req, res, next) => {
+
     var eingabe = req.query.eingabe;
-    var funktion = req.query.funktion;
     console.log(`Die Eingabe lautete: ${eingabe}`);
-    var data;
+    /*var adressen = */
+        testanalyse(eingabe);
 
-    data = db.analyseTextAndGetAdressen(
-        config.hdb,
-        funktion,
-        // ermittleKoordinaten(),
-        eingabe,
-        data => res.type('application/json').send(data),
-        info => console.log(info)
-        );
-
-    data.forEach(function(item, index) {
+/*    adressen.forEach(function (item, index) {
         console.log(item, index);
-    });
+    });*/
+
+
+    /*
+        data = db.analyseTextAndGetAdressen(
+            config.hdb,
+            funktion,
+            // ermittleKoordinaten(),
+            eingabe,
+            data => res.type('application/json').send(data),
+            info => console.log(info)
+            );
+
+        /!*data.forEach(function(item, index) {
+            console.log(item, index);
+        });*!/*/
 
 });
+
+function testanalyse(eingabe) {
+
+    const hanaClient = require("@sap/hana-client");
+    const connection = hanaClient.createConnection();
+    const ta = require("@sap/textanalysis");
+
+    console.log("starting text analysis");
+    connection.connect(config.hdb, (err) => {
+        if (err) {
+            return console.error("Connection error", err);
+        }
+        const values = {
+            DOCUMENT_TEXT: eingabe,
+            LANGUAGE_CODE: 'DE',
+            CONFIGURATION: 'EXTRACTION_CORE',
+            RETURN_PLAINTEXT: 0
+        };
+        ta.analyze(values, connection, function done(err, parameters, rows) {
+            if (err) {
+                return console.error('error', err);
+            }
+            console.log("finished text analysis");
+            const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
+            if (addressRows.length != 2) {
+                console.log(addressRows.length + " addresses were given. Only 2 allowed!")
+            } else {
+                var adress = [];
+                addressRows.forEach(function (row, index) {
+                    adress.push(row.TOKEN);
+                });
+                connection.disconnect();
+                adress.forEach(function (item, index) {
+                    console.log(item, index);
+                });
+                adress => res.type('application/json').send("test");
+                return adress;
+            }
+        });
+
+    });
+
+}
+
+function testanalyse2(eingabe) {
+
+    const hanaClient = require("@sap/hana-client");
+    const connection = hanaClient.createConnection();
+    const ta = require("@sap/textanalysis");
+
+    console.log("starting text analysis");
+
+    connection.connect(config.hdb, (err) => {
+        if (err) {
+            return console.error("Connection error", err);
+        }
+        const values = {
+            DOCUMENT_TEXT: eingabe,
+            LANGUAGE_CODE: 'DE',
+            CONFIGURATION: 'EXTRACTION_CORE',
+            RETURN_PLAINTEXT: 0
+        };
+        ta.analyze(values, connection, function done(err, parameters, rows) {
+            if (err) {
+                return console.error('error', err);
+            }
+            console.log("finished text analysis");
+            const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
+            if (addressRows.length != 2) {
+                console.log(addressRows.length + " addresses were given. Only 2 allowed!")
+            } else {
+                var adress = [];
+                var coordinates = [];
+                addressRows.forEach(function (row, index) {
+                    data = ermittleKoordinaten(row.TOKEN+ ", Berlin");
+                    adress.push(row.TOKEN);
+                    var lat = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+                    var lng = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+                    coordinates.push(lat);
+                    coordinates.push(lng);
+                });
+                connection.disconnect();
+                coordinates.forEach(function (item, index) {
+                    console.log(item, index);
+                });
+                return coordinates;
+            }
+        });
+
+    });
+
+}
 
 function ermittleKoordinaten(adresse){
 
@@ -377,18 +477,18 @@ function ermittleKoordinaten(adresse){
         jsonp: 'jsoncallback',
         data: {
             searchtext: adresse,
-            app_id: Cred.getHereAppId(),
-            app_code: Cred.getHereAppCode(),
+            app_id: 'ph7OpruL7loo1uVkzxu3',
+            app_code: 'Z8uRJ5pPxz-02LIKv_4Xnw',
             gen: '9'
         },
         success: function (data) {
             return data;
 
-            alert("Daten erhalten");
+            console.log("Daten erhalten");
 
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+            console.log(textStatus + '\n' + jqXHR + '\n' + errorThrown);
         }
     })
 
