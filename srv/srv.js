@@ -341,12 +341,39 @@ app.get('/textanalyse', (req, res, next) => {
     var eingabe = req.query.eingabe;
     var funktion = req.query.funktion;
     console.log(`Die Eingabe lautete: ${eingabe}`);
-    db.analyseTextAndGetAdressen(
+    data=db.analyseTextAndGetAdressen(
         config.hdb,
         funktion,
+       // ermittleKoordinaten(),
         eingabe,
-        rows => res.type('application/json').send(rows),
+        data => res.type('application/json').send(data),
         info => console.log(info)
     );
 
 });
+
+function ermittleKoordinaten(adresse){
+
+    $.ajax({
+        url: 'https://geocoder.api.here.com/6.2/geocode.json',
+        type: 'GET',
+        dataType: 'jsonp',
+        jsonp: 'jsoncallback',
+        data: {
+            searchtext: adresse,
+            app_id: Cred.getHereAppId(),
+            app_code: Cred.getHereAppCode(),
+            gen: '9'
+        },
+        success: function (data) {
+            return data;
+
+            alert("Daten erhalten");
+
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+        }
+    })
+
+}

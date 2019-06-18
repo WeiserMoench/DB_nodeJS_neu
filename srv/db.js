@@ -61,13 +61,17 @@ module.exports = {
                 const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
                 if (addressRows.length != 2) {
                     console.log(addressRows.length + " addresses were given. Only 2 allowed!")
-                    res.type('application/json').send({message: 'Problem!'});
-                    connection.close();
+                    //res.type('application/json').send({message: 'Problem!'});
                 } else {
+                    var adress = [];
                     addressRows.forEach(function (row, index) {
+                        adress.push(row.TOKEN);
                         console.log(row.TOKEN);
-                        getGeoCoordinates(row.TOKEN);
+                        console.log(adress.length);
+                        //getGeoCoordinates(row.TOKEN);
                     });
+                    connection.disconnect();
+                    return adress;
                 }
 
             });

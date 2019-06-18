@@ -141,6 +141,10 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
                 type: 'GET',
 
                 success: function (data) {
+                    alert("erfolgreich beim Controller angekommen");
+                    data.forEach(function(item, index) {
+                        console.log(item, index);
+                    });
 
                     var log = self.getView().byId('log');
                     log.setValue(JSON.stringify(data, null, 2));
