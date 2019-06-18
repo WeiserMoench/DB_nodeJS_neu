@@ -119,5 +119,22 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			});
 			log.setValue("Tabelle edges erfolgreich importiert");
 		},
+
+		onButton4Press: function (oEvent) {
+			sap.m.MessageToast.show('Test find shortest path.');
+			//self = this;
+			$.ajax({
+				url: `http://127.0.0.1:3000/testShortestPath`,
+				type: 'GET',
+				success: function () {
+					var log = self.getView().byId('log');
+					log.setValue(JSON.stringify("shortest path = "));
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					//sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+				}
+			});
+			log.setValue("shortest path is shown...");
+		},
 	});
 });

@@ -332,6 +332,16 @@ app.get('/importEdges', (req, res, next) => {
   console.log("Import Edges Tabelle wurde aufgerufen")
 });
 
-function shortest_path(){
+app.get('/testShortestPath', (req, res, next) => {
 
-}
+  const hanaClient = require("@sap/hana-client");
+  const connection = hanaClient.createConnection();
+  connection.connect(config.hdb);
+
+  var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => 187, END_NODE_ID => 5, EDGE_NAME => ?)";
+  console.log(sql_str);
+  var result = connection.exec( sql_str, []);
+  console.log( JSON.stringify( result))
+
+  connection.disconnect();
+});
