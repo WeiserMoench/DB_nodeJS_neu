@@ -130,6 +130,28 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 		},
 
 		onButton4Press: function (oEvent) {
+
+			$.ajax({
+			  url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+			  type: 'GET',
+			  dataType: 'jsonp',
+			  jsonp: 'callbackFunc',
+			  data: {
+			    center: '52.534314000000,13.328703000000',
+			    radius: '350',
+					app_id: Cred.getHereAppId(),
+					app_code: Cred.getHereAppCode(),
+					gen: '9',
+			    max: '3'
+			  },
+			  success: function (data) {
+			    alert(JSON.stringify(data));
+			  },
+				failure: function(err) {
+					alert(JSON.stringify(err));
+				}
+			});
+
 			sap.m.MessageToast.show('Test find shortest path.');
 			//self = this;
 			$.ajax({
@@ -214,7 +236,35 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
             }
         })
 
-    }
+    },
+
+		findNextStation: function( geolocs) {
+
+			sap.m.MessageToast.show('Test findNextStation.');
+
+			$.ajax({
+			  url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+			  type: 'GET',
+			  dataType: 'jsonp',
+			  jsonp: 'callbackFunc',
+			  data: {
+			    center: '55.7541,37.6200',
+			    radius: '350',
+			    app_id: 'devportal-demo-20180625',
+			    app_code: '9v2BkviRwi9Ot26kp2IysQ',
+			    max: '3'
+			  },
+			  success: function (data) {
+			    alert(JSON.stringify(data));
+			  },
+				failure: function(err) {
+					alert(JSON.stringify(err));
+				}
+			});
+
+			// log.setValue("Tabelle nodes erfolgreich importiert");
+		},
+
 
 	});
 });
