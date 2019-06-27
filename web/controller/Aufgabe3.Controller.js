@@ -129,6 +129,8 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			log.setValue("Tabelle edges erfolgreich importiert");
 		},
 
+//find next public transport station nearby
+//Code von https://developer.here.com/api-explorer/rest/public_transit/station-search-proximity
 		onButton4Press: function (oEvent) {
 
 			$.ajax({
@@ -168,6 +170,20 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 			log.setValue("shortest path is shown...");
 		},
 
+		processResponseNextStation: function( data){
+			let i;
+			for( i=1; i < data["Res"]["Stations"]["Stn"].length; i++) {
+				var cstn = data["Res"]["Stations"]["Stn"][i];
+				let j;
+				for( j=1; j < cstn["Transports"]["Transport"].length; j++) {
+					var first_letter = cstn["Transports"]["Transport"][j]["name"].charAt(0);
+					if( first_letter == "S" || first_letter == "U") {
+						return cstn["name"];
+					}
+				}
+			}
+		},
+
     requestFahrrouteEineEingabe: function (eingabezeile) {
         //alert("FahrrouteEineEingabe aufgerufen");
         self = this;
@@ -179,14 +195,114 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
             url: `http://127.0.0.1:3000/textanalyse?eingabe=${eingabezeile}`,//&funktion=${ermittleKoordinaten}`,
             type: 'GET',
 
-            success: function (data) {
-                alert("erfolgreich beim Controller angekommen");
-                data.forEach(function(item, index) {
-                    console.log(item, index);
-                });
+            success: function( addresses_start_end) {
 
-                var log = self.getView().byId('log');
-                log.setValue(JSON.stringify(data, null, 2));
+								$.ajax({
+										url: 'https://geocoder.api.here.com/6.2/geocode.json',
+										type: 'GET',
+										dataType: 'jsonp',
+										jsonp: 'jsoncallback',
+										data: {
+												searchtext: addresses_start_end[0] + ", Berlin",
+												app_id: Cred.getHereAppId(),
+												app_code: Cred.getHereAppCode(),
+												gen: '9'
+										},
+										success: function (latlngstart) {
+
+											var latstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+											var lngstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+
+											$.ajax({
+												url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+												type: 'GET',
+												dataType: 'jsonp',
+												jsonp: 'callbackFunc',
+												data: {
+													center: latstart + "," + lngstart,
+													radius: '3000',
+													app_id: Cred.getHereAppId(),
+													app_code: Cred.getHereAppCode(),
+													max: '20'
+												},
+												success: function ( stations_start) {
+
+													var stnname_start = self.processResponseNextStation( stations_start);
+
+													$.ajax({
+															url: 'https://geocoder.api.here.com/6.2/geocode.json',
+															type: 'GET',
+															dataType: 'jsonp',
+															jsonp: 'jsoncallback',
+															data: {
+																	searchtext: addresses_start_end[1] + ", Berlin",
+																	app_id: Cred.getHereAppId(),
+																	app_code: Cred.getHereAppCode(),
+																	gen: '9'
+															},
+															success: function (latlngend) {
+
+																var latend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+																var lngend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+
+																$.ajax({
+																	url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+																	type: 'GET',
+																	dataType: 'jsonp',
+																	jsonp: 'callbackFunc',
+																	data: {
+																		center: latend + "," + lngend,
+																		radius: '3000',
+																		app_id: Cred.getHereAppId(),
+																		app_code: Cred.getHereAppCode(),
+																		max: '20'
+																	},
+																	success: function (stations_end) {
+
+																		var stnname_end = self.processResponseNextStation( stations_end);
+
+																		var log = self.getView().byId('log');
+																		log.setValue(stnname_start + " -> " + stnname_end);
+
+																		// to be adapted
+
+																		// url: `http://127.0.0.1:3000/route?latStart=${latStart}&lngStart=${lngStart}&latStop=${latStop}&lngStop=${lngStop}`,
+																		// type: 'GET',
+																		//
+																		// success: function (data) {
+																		// 	var log = self.getView().byId('log');
+																		// 	log.setValue(JSON.stringify(data, null, 2));
+																		// },
+																		// error: function (jqXHR, textStatus, errorThrown) {
+																		// 	sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+																		// }
+																		
+																	},
+																	failure: function(err) {
+																		alert(JSON.stringify(err));
+																	}
+																});
+
+															},
+															error: function (jqXHR, textStatus, errorThrown) {
+																	alert("Error.");
+															}
+													})
+
+												},
+												failure: function(err) {
+													alert(JSON.stringify(err));
+												}
+											});
+
+										},
+										error: function (jqXHR, textStatus, errorThrown) {
+												alert("Error.");
+										}
+								})
+
+                // var log = self.getView().byId('log');
+                // log.setValue( "E" + JSON.stringify(data[0], null, 2));
 
                 /*$.ajax({
 
@@ -238,9 +354,37 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
     },
 
+
 		findNextStation: function( geolocs) {
 
 			sap.m.MessageToast.show('Test findNextStation.');
+
+			$.ajax({
+			  url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+			  type: 'GET',
+			  dataType: 'jsonp',
+			  jsonp: 'callbackFunc',
+			  data: {
+			    center: '55.7541,37.6200',
+			    radius: '350',
+			    app_id: 'devportal-demo-20180625',
+			    app_code: '9v2BkviRwi9Ot26kp2IysQ',
+			    max: '3'
+			  },
+			  success: function (data) {
+			    alert(JSON.stringify(data));
+			  },
+				failure: function(err) {
+					alert(JSON.stringify(err));
+				}
+			});
+
+			// log.setValue("Tabelle nodes erfolgreich importiert");
+		},
+
+		getCoordinatesFromText: function( long, lat) {
+
+			sap.m.MessageToast.show('Test erhalte Koordinaten.');
 
 			$.ajax({
 			  url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',

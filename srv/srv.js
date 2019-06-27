@@ -336,6 +336,8 @@ app.get('/importEdges', (req, res, next) => {
 
 app.get('/testShortestPath', (req, res, next) => {
 
+  // Two sql statements : look up node id by station name
+
   const hanaClient = require("@sap/hana-client");
   const connection = hanaClient.createConnection();
   connection.connect(config.hdb);
@@ -367,30 +369,7 @@ app.get('/textanalyse', (req, res, next) => {
     var eingabe = req.query.eingabe;
     console.log(`Die Eingabe lautete: ${eingabe}`);
     /*var adressen = */
-        testanalyse(eingabe);
-
-/*    adressen.forEach(function (item, index) {
-        console.log(item, index);
-    });*/
-
-
-    /*
-        data = db.analyseTextAndGetAdressen(
-            config.hdb,
-            funktion,
-            // ermittleKoordinaten(),
-            eingabe,
-            data => res.type('application/json').send(data),
-            info => console.log(info)
-            );
-
-        /!*data.forEach(function(item, index) {
-            console.log(item, index);
-        });*!/*/
-
-});
-
-function testanalyse(eingabe) {
+        // testanalyse(eingabe);
 
     const hanaClient = require("@sap/hana-client");
     const connection = hanaClient.createConnection();
@@ -411,7 +390,7 @@ function testanalyse(eingabe) {
             if (err) {
                 return console.error('error', err);
             }
-            console.log("finished text analysis");
+            console.log("finished text analysis 2");
             const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
             if (addressRows.length != 2) {
                 console.log(addressRows.length + " addresses were given. Only 2 allowed!")
@@ -424,63 +403,107 @@ function testanalyse(eingabe) {
                 adress.forEach(function (item, index) {
                     console.log(item, index);
                 });
-                adress => res.type('application/json').send("test");
-                return adress;
+                res.type('application/json').send( adress);
             }
         });
 
     });
 
-}
+});
 
-function testanalyse2(eingabe) {
-
-    const hanaClient = require("@sap/hana-client");
-    const connection = hanaClient.createConnection();
-    const ta = require("@sap/textanalysis");
-
-    console.log("starting text analysis");
-
-    connection.connect(config.hdb, (err) => {
-        if (err) {
-            return console.error("Connection error", err);
-        }
-        const values = {
-            DOCUMENT_TEXT: eingabe,
-            LANGUAGE_CODE: 'DE',
-            CONFIGURATION: 'EXTRACTION_CORE',
-            RETURN_PLAINTEXT: 0
-        };
-        ta.analyze(values, connection, function done(err, parameters, rows) {
-            if (err) {
-                return console.error('error', err);
-            }
-            console.log("finished text analysis");
-            const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
-            if (addressRows.length != 2) {
-                console.log(addressRows.length + " addresses were given. Only 2 allowed!")
-            } else {
-                var adress = [];
-                var coordinates = [];
-                addressRows.forEach(function (row, index) {
-                    data = ermittleKoordinaten(row.TOKEN+ ", Berlin");
-                    adress.push(row.TOKEN);
-                    var lat = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-                    var lng = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
-                    coordinates.push(lat);
-                    coordinates.push(lng);
-                });
-                connection.disconnect();
-                coordinates.forEach(function (item, index) {
-                    console.log(item, index);
-                });
-                return coordinates;
-            }
-        });
-
-    });
-
-}
+// function testanalyse(eingabe) {
+//
+//     const hanaClient = require("@sap/hana-client");
+//     const connection = hanaClient.createConnection();
+//     const ta = require("@sap/textanalysis");
+//
+//     console.log("starting text analysis");
+//     connection.connect(config.hdb, (err) => {
+//         if (err) {
+//             return console.error("Connection error", err);
+//         }
+//         const values = {
+//             DOCUMENT_TEXT: eingabe,
+//             LANGUAGE_CODE: 'DE',
+//             CONFIGURATION: 'EXTRACTION_CORE',
+//             RETURN_PLAINTEXT: 0
+//         };
+//         ta.analyze(values, connection, function done(err, parameters, rows) {
+//             if (err) {
+//                 return console.error('error', err);
+//             }
+//             console.log("finished text analysis 2");
+//             const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
+//             const addressRows = rows.filter(row => row.TYPE == 'LOCALITY');
+//             if (addressRows.length != 2) {
+//                 console.log(addressRows.length + " addresses were given. Only 2 allowed!")
+//             } else {
+//                 var adress = [];
+//                 addressRows.forEach(function (row, index) {
+//                     adress.push(row.TOKEN);
+//                 });
+//                 connection.disconnect();
+//                 adress.forEach(function (item, index) {
+//                     console.log(item, index);
+//                 });
+//                 adress => res.type('application/json').send("test");
+//                 return adress;
+//             }
+//         });
+//
+//     });
+//
+// }
+//
+// function testanalyse2(eingabe) {
+//
+//     const hanaClient = require("@sap/hana-client");
+//     const connection = hanaClient.createConnection();
+//     const ta = require("@sap/textanalysis");
+//
+//     console.log("starting text analysis");
+//
+//     connection.connect(config.hdb, (err) => {
+//         if (err) {
+//             return console.error("Connection error", err);
+//         }
+//         const values = {
+//             DOCUMENT_TEXT: eingabe,
+//             LANGUAGE_CODE: 'DE',
+//             CONFIGURATION: 'EXTRACTION_CORE',
+//             RETURN_PLAINTEXT: 0
+//         };
+//         ta.analyze(values, connection, function done(err, parameters, rows) {
+//             if (err) {
+//                 return console.error('error', err);
+//             }
+//             console.log("finished text analysis 2");
+//             const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
+//             if (addressRows.length != 2) {
+//                 console.log(addressRows.length + " addresses were given. Only 2 allowed!")
+//             } else {
+//                 var adress = [];
+//                 var coordinates = [];
+//                 addressRows.forEach(function (row, index) {
+//                     data = ermittleKoordinaten(row.TOKEN+ ", Berlin");
+//                     adress.push(row.TOKEN);
+//                     var lat = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+//                     var lng = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+//                     coordinates.push(lat);
+//                     coordinates.push(lng);
+//                 });
+//                 connection.disconnect();
+//                 coordinates.forEach(function (item, index) {
+//                     console.log( "Here");
+//                     console.log( item, index);
+//                 });
+//                 return coordinates;
+//             }
+//         });
+//
+//     });
+//
+// }
 
 function ermittleKoordinaten(adresse){
 
