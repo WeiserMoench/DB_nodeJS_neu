@@ -285,12 +285,12 @@ function importEdgeFromFile( url) {
 
                         console.log(line + " : '" + output[i][j] + "' -> '" + output[i][j+1] + "'.");
 
-                        //synchrone DB-Connection, um node_id als Ergebnis zu erhalten (Blocking Aufruf)
-                        var sql_str1 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
+                        //synchrone DB-Connection, um node_id als Ergebnis zu erhalten (Blocking Aufruf), um danach die Tabelle mit dem Ergebnis zu befuellen
+                        var sql_str1 = "SELECT \"node_ID\", \"stop_lat\", \"stop_long\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j] +"%' LIMIT 1";
                         var result1 = connection.exec( sql_str1, []);
                         console.log(sql_str1)
 
-                        var sql_str2 = "SELECT \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j+1] +"%' LIMIT 1";
+                        var sql_str2 = "SELECT \"node_ID\", \"stop_lat\", \"stop_long\" FROM Nodes WHERE \"stop_name\" LIKE '%" + output[i][j+1] +"%' LIMIT 1";
                         var result2 = connection.exec( sql_str2, []);
 
                         console.log( line + " : " + JSON.stringify( result1) + " -> " + JSON.stringify( result2));
@@ -300,8 +300,17 @@ function importEdgeFromFile( url) {
 
                           console.log( line + " : " + JSON.stringify( result1[0]["node_ID"]) + " -> " + JSON.stringify( result2[0]["node_ID"]));
 
-                          var sql_insert = "Insert into U558587.Edges ( \"start\", \"end\", \"line\", \"start_name\", \"end_name\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "', '" + output[i][j] +"', '" + output[i][j+1] + "')";
-                          result_insert = connection.exec( sql_insert);
+                          // Bestimmen der Distanz zwischen den Haltestellen bzw jeder Kante
+                          const sql_dist = `Select NEW ST_Point('Point(`+ result1[0]["stop_lat"] + ` ` + result1[0]["stop_long"] +` )', 4326).ST_Distance(new ST_Point('Point(`+ result2[0]["stop_lat"] + ` ` + result2[0]["stop_long"] +` )', 4326), 'kilometer') AS dist FROM dummy`;
+                          result_dist = connection.exec( sql_dist);
+                          console.log( JSON.stringify( result_dist[0]["DIST"]));
+
+                          var sql_insert1 = "Insert into U558587.Edges ( \"start\", \"end\", \"line\", \"start_name\", \"end_name\", \"distance\") VALUES ( " + JSON.stringify( result1[0]["node_ID"]) + ", " + JSON.stringify( result2[0]["node_ID"]) + ", '" + line + "', '" + output[i][j] +"', '" + output[i][j+1] + "', " + JSON.stringify( Math.round( result_dist[0]["DIST"] * 1000)) + ")";
+                          result_insert1 = connection.exec( sql_insert1);
+
+                          //um den Graph bidirektional zu machen
+                          var sql_insert2 = "Insert into U558587.Edges ( \"start\", \"end\", \"line\", \"start_name\", \"end_name\", \"distance\") VALUES ( " + JSON.stringify( result2[0]["node_ID"]) + ", " + JSON.stringify( result1[0]["node_ID"]) + ", '" + line + "', '" + output[i][j+1] +"', '" + output[i][j] + "', " + JSON.stringify( Math.round( result_dist[0]["DIST"] * 1000)) + ")";
+                          result_insert2 = connection.exec( sql_insert2);
                         }
                       }
                     }
@@ -349,22 +358,35 @@ app.get('/testShortestPath', (req, res, next) => {
   var nodeid_start = result_start[0]["node_ID"];
   var nodeid_end = result_end[0]["node_ID"];
 
-  var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => " + JSON.stringify(nodeid_start) + ", END_NODE_ID => " + JSON.stringify(nodeid_end) + ", EDGE_NAME => ?)";
+  // var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => " + JSON.stringify(nodeid_start) + ", END_NODE_ID => " + JSON.stringify(nodeid_end) + ", EDGE_NAME => ?)";
+  var sql_str = "CALL \"U558587\".\"find_shortest_path_dist\"( START_NODE_ID => " + JSON.stringify(nodeid_start) + ", END_NODE_ID => " + JSON.stringify(nodeid_end) + ", EDGE_NAME => ?, totalDistance => ?)";
   console.log(sql_str);
+  // TODO: how to access totalDistance computed in find_shortest_path_dist
   var result = connection.exec( sql_str, []);
   console.log( JSON.stringify( result))
 
   connection.disconnect();
 
-  // find interchange stations
+  // Finden der Umsteigebahnhoefe
+  var total_distance = 0.;
+  var total_route = "";
   let i;
   for (i=0; i<result.length-1; i++) {
     var line = result[i]["line"];
+    total_distance += result[i]["distance"]
     console.log(line);
+    total_route += line + "\n";
     if( result[i]["line"] != result[i+1]["line"]){
+      total_route += "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n";
       console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );
     }
   }
+  console.log( "Total distance: " + JSON.stringify(total_distance));
+  total_route += "\nGesamtdistanz: " + JSON.stringify(total_distance / 1000.) + " km";
+  console.log( total_route);
+
+  // zuerckgeben des Ergenisstrings an Controller:
+  res.type('application/json').send( [total_route]);
 
 });
 

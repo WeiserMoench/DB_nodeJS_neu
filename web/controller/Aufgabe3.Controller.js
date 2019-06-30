@@ -271,7 +271,8 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
 																			success: function (data) {
 																				var log = self.getView().byId('log');
-																				log.setValue(JSON.stringify(data, null, 2));
+																				sap.m.MessageToast.show( data);
+																				log.setValue( data);
 																			},
 																			error: function (jqXHR, textStatus, errorThrown) {
 																				sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
