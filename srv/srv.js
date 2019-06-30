@@ -94,10 +94,6 @@ app.get('/import', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-
-    //var url = 'http://fiebelkorn24.de/stations.csv';
-    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
-    //var url = 'http://fiebelkorn24.de/data.csv'
     var url = 'https://dev.azure.com/tankerkoenig/362e70d1-bafa-4cf7-a346-1f3613304973/_apis/git/repositories/0d6e7286-91e4-402c-af56-fa75be1f223d/Items?path=%2Fstations%2Fstations.csv&versionDescriptor%5BversionOptions%5D=0&versionDescriptor%5BversionType%5D=0&versionDescriptor%5Bversion%5D=master&download=true&resolveLfs=true&%24format=octetStream&api-version=5.0-preview.1'
 
     request.get(url , function (error, response, body) { //
@@ -147,10 +143,6 @@ app.get('/importVBB', (req, res, next) => {
     const parse = require('csv-parse');
     var request = require('request');
 
-
-    //var url = 'http://fiebelkorn24.de/stations.csv';
-    //var url = 'https://wiki.htw-berlin.de/confluence/download/attachments/31623434/test.txt';
-    //var url = 'http://fiebelkorn24.de/data.csv'
     var url = 'http://127.0.0.1/stops.txt';
     request.get(url , function (error, response, body) { //
         if (!error && response.statusCode == 200) {
@@ -192,7 +184,7 @@ app.get('/importVBB', (req, res, next) => {
     console.log("ImportVBB wurde aufgerufen")
 });
 
-//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+//Methode lädt alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
 app.get('/importBerlin', (req, res, next) => {
 
     const parse = require('csv-parse');
@@ -342,8 +334,20 @@ app.get('/testShortestPath', (req, res, next) => {
   const connection = hanaClient.createConnection();
   connection.connect(config.hdb);
 
-  var nodeid_start = 187;
-  var nodeid_end = 5;
+  var stnname_start = req.query.stnname_start;
+  var stnname_end = req.query.stnname_end;
+  var sql_station_start = "Select \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + stnname_start + "%' LIMIT 1";
+  var sql_station_end = "Select \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + stnname_end + "%' LIMIT 1";
+  console.log( "sql_station_start : " + sql_station_start);
+  // .substring(1,stnname_start.length-2))
+
+  var result_start = connection.exec( sql_station_start, []);
+  var result_end = connection.exec( sql_station_end, []);
+  console.log( "Start-Haltestelle: " + JSON.stringify( result_start));
+  console.log( "Ziel-Haltestelle: " + JSON.stringify( result_end));
+
+  var nodeid_start = result_start[0]["node_ID"];
+  var nodeid_end = result_end[0]["node_ID"];
 
   var sql_str = "CALL \"U558587\".\"find_shortest_path\"( START_NODE_ID => " + JSON.stringify(nodeid_start) + ", END_NODE_ID => " + JSON.stringify(nodeid_end) + ", EDGE_NAME => ?)";
   console.log(sql_str);
@@ -358,7 +362,7 @@ app.get('/testShortestPath', (req, res, next) => {
     var line = result[i]["line"];
     console.log(line);
     if( result[i]["line"] != result[i+1]["line"]){
-      console.log( "Changing from " + result[i]["line"] + " to " + result[i+1]["line"] + " at station " + result[i]["end_name"] );
+      console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );
     }
   }
 

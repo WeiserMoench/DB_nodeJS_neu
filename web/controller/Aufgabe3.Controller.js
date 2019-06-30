@@ -188,13 +188,13 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
         //alert("FahrrouteEineEingabe aufgerufen");
         self = this;
 
-        const ermittleKoordinaten = self.ermittleKoordinaten();
+        //const ermittleKoordinaten = self.ermittleKoordinaten();
 
         $.ajax({
 
             url: `http://127.0.0.1:3000/textanalyse?eingabe=${eingabezeile}`,//&funktion=${ermittleKoordinaten}`,
             type: 'GET',
-
+						// adresses_start_end = Rueckgabe der Textanalyse
             success: function( addresses_start_end) {
 
 								$.ajax({
@@ -226,7 +226,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 													max: '20'
 												},
 												success: function ( stations_start) {
-
+													//Start-Haltestelle
 													var stnname_start = self.processResponseNextStation( stations_start);
 
 													$.ajax({
@@ -258,25 +258,26 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 																		max: '20'
 																	},
 																	success: function (stations_end) {
-
+																		//Ziel-Haltestelle
 																		var stnname_end = self.processResponseNextStation( stations_end);
 
 																		var log = self.getView().byId('log');
 																		log.setValue(stnname_start + " -> " + stnname_end);
 
-																		// to be adapted
+																		// Uebermittlung an find-shortest-path in srv.js
+																		$.ajax({
+																		 	url: `http://127.0.0.1:3000/testShortestPath?stnname_start=${stnname_start}&stnname_end=${stnname_end}`,
+																			type: 'GET',
 
-																		// url: `http://127.0.0.1:3000/route?latStart=${latStart}&lngStart=${lngStart}&latStop=${latStop}&lngStop=${lngStop}`,
-																		// type: 'GET',
-																		//
-																		// success: function (data) {
-																		// 	var log = self.getView().byId('log');
-																		// 	log.setValue(JSON.stringify(data, null, 2));
-																		// },
-																		// error: function (jqXHR, textStatus, errorThrown) {
-																		// 	sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
-																		// }
-																		
+																			success: function (data) {
+																				var log = self.getView().byId('log');
+																				log.setValue(JSON.stringify(data, null, 2));
+																			},
+																			error: function (jqXHR, textStatus, errorThrown) {
+																				sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+																			}
+																		})
+
 																	},
 																	failure: function(err) {
 																		alert(JSON.stringify(err));
