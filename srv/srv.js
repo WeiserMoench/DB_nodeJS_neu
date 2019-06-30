@@ -372,12 +372,13 @@ app.get('/testShortestPath', (req, res, next) => {
   var total_route = "";
   let i;
   for (i=0; i<result.length-1; i++) {
-    var line = result[i]["line"];
-    total_distance += result[i]["distance"]
+    var line = "Linie: " + result[i]["line"] + " *** Haltestelle: ";
+    total_distance += result[i]["distance"];
     console.log(line);
-    total_route += line + "\n";
+    //console.console.log(" Teilstreckendistanz: " + total_distance);
+    total_route += line + result[i]["start_name"] +"\n";
     if( result[i]["line"] != result[i+1]["line"]){
-      total_route += "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n";
+      total_route += "\nBitte Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n\n";
       console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );
     }
   }

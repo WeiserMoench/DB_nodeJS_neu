@@ -210,6 +210,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 										},
 										success: function (latlngstart) {
 
+
 											var latstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
 											var lngstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
 
@@ -226,6 +227,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 													max: '20'
 												},
 												success: function ( stations_start) {
+
 													//Start-Haltestelle
 													var stnname_start = self.processResponseNextStation( stations_start);
 
@@ -241,6 +243,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 																	gen: '9'
 															},
 															success: function (latlngend) {
+
 
 																var latend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
 																var lngend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
@@ -258,6 +261,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 																		max: '20'
 																	},
 																	success: function (stations_end) {
+
 																		//Ziel-Haltestelle
 																		var stnname_end = self.processResponseNextStation( stations_end);
 
