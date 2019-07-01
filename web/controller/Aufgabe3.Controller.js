@@ -18,60 +18,7 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 
             self.requestFahrrouteEineEingabe(eingabe);
 
-/*			var startadresse = this.getView().byId('startadresse').getValue();
-			var zieladresse = this.getView().byId('zieladresse').getValue();
 
-
-			//Geocoding
-			$.ajax({
-				url: 'https://geocoder.api.here.com/6.2/geocode.json',
-				type: 'GET',
-				dataType: 'jsonp',
-				jsonp: 'jsoncallback',
-				data: {
-					searchtext: startadresse,
-					app_id: Cred.getHereAppId(),
-					app_code: Cred.getHereAppCode(),
-					gen: '9'
-				},
-				success: function (data) {
-					var latStart = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-					var lngStart = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
-
-
-					$.ajax({
-						url: 'https://geocoder.api.here.com/6.2/geocode.json',
-						type: 'GET',
-						dataType: 'jsonp',
-						jsonp: 'jsoncallback',
-						data: {
-							searchtext: zieladresse,
-							app_id: Cred.getHereAppId(),
-							app_code: Cred.getHereAppCode(),
-							gen: '9'
-						},
-						success: function (data) {
-							var latStop = data.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-							var lngStop = data.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
-
-
-							alert("Start: " + latStart + " " + lngStart + "\nStop: " + latStop + " " + lngStop);
-
-							self.requestFahrrouteZweiFelder(latStart, lngStart, latStop, lngStop);
-
-
-						},
-						error: function (jqXHR, textStatus, errorThrown) {
-							sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
-						}
-					})
-
-					//alert("test" + lat + " " + lng);
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-					sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
-				}
-			});*/
 		},
 
 		requestFahrrouteZweiFelder: function (latStart, lngStart, latStop, lngStop) {

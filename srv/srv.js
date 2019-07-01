@@ -348,6 +348,7 @@ app.get('/testShortestPath', (req, res, next) => {
   var sql_station_start = "Select \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + stnname_start + "%' LIMIT 1";
   var sql_station_end = "Select \"node_ID\" FROM Nodes WHERE \"stop_name\" LIKE '%" + stnname_end + "%' LIMIT 1";
   console.log( "sql_station_start : " + sql_station_start);
+  console.log( "sql_station_end : " + sql_station_end);
   // .substring(1,stnname_start.length-2))
 
   var result_start = connection.exec( sql_station_start, []);
@@ -371,17 +372,28 @@ app.get('/testShortestPath', (req, res, next) => {
   var total_distance = 0.;
   var total_route = "";
   let i;
-  for (i=0; i<result.length-1; i++) {
+//  var lenght=result.length;
+//  var max = lenght-1;
+  for (i=0; i<=result.length-1; i++) {
     var line = "Linie: " + result[i]["line"] + " *** Haltestelle: ";
     total_distance += result[i]["distance"];
+    console.log("Route element " + result[i]["route"]);
+    console.log(" Zähler i in for Schleife " + i );
     console.log(line);
     //console.console.log(" Teilstreckendistanz: " + total_distance);
     total_route += line + result[i]["start_name"] +"\n";
-    if( result[i]["line"] != result[i+1]["line"]){
+    if( i<result.length-1 && result[i]["line"] != result[i+1]["line"]){
       total_route += "\nBitte Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n\n";
       console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );
+        console.log(" Zähler i in if " + i );
+    }else if(i==result.length-1){
+        total_route += "\nBitte Austeigen an der Station: " + result[i]["end_name"] + "\n\n";
+        console.log( "Bitte Austeigen an der Station " + result[i]["end_name"] );
     }
   }
+/*  total_route += "\nBitte Austeigen an der Station  " + result[i]["end_name"] + "\n\n";
+  console.log( "Bitte Austeigen an der Station  " + result[i]["end_name"] );*/
+  console.log(" Zähler i außerhalb for schleife " + i );
   console.log( "Total distance: " + JSON.stringify(total_distance));
   total_route += "\nGesamtdistanz: " + JSON.stringify(total_distance / 1000.) + " km";
   console.log( total_route);
@@ -424,7 +436,7 @@ app.get('/textanalyse', (req, res, next) => {
             } else {
                 var adress = [];
                 addressRows.forEach(function (row, index) {
-                    adress.push(row.TOKEN);
+                    adress.push(row.TOKEN + ", Berlin");
                 });
                 connection.disconnect();
                 adress.forEach(function (item, index) {
