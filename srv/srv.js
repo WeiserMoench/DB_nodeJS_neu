@@ -377,11 +377,11 @@ app.get('/testShortestPath', (req, res, next) => {
   for (i=0; i<=result.length-1; i++) {
     var line = "Linie: " + result[i]["line"] + " *** Haltestelle: ";
     total_distance += result[i]["distance"];
-    console.log("Route element " + result[i]["route"]);
+//    console.log("Route element " + result[i]["route"]);
 //    console.log(" Zähler i in for Schleife " + i );
     console.log(line);
     //console.console.log(" Teilstreckendistanz: " + total_distance);
-    total_route += line + result[i]["start_name"] +"\n";
+    total_route += line + result[i]["start_name"] + ", Distanz zur vorherigen Station: " + result[i]["distance"] + " m" +"\n";
     if( i<result.length-1 && result[i]["line"] != result[i+1]["line"]){
       total_route += "\nBitte Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n\n";
       console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );

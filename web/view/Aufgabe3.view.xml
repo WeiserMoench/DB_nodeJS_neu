@@ -19,7 +19,7 @@
 						<Button text="Los!" press="onFindButtonPress"/>
 					</InputListItem>
 				</List>
-				<TextArea id="log" value="leer" width="10cm" rows="8"/>
+				<TextArea id="log" value="leer" width="18cm" rows="8"/>
 				<HBox><Button text="Import Nodes" press="onButton2Press"/></HBox>
 				<HBox><Button text="Import Edges" press="onButton3Press"/></HBox>
 				<HBox><Button text="Test shortest path" press="onButton4Press"/></HBox>
