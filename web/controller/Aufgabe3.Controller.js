@@ -148,10 +148,10 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
 					sap.m.MessageToast.show("fehlerhafte Eingabe, bitte die Ausgabe beachten");
 					alert(addresses_start_end);
 					var log = self.getView().byId('log');
-					log.setValue("Bitte gebe 2 Adressen ein, sollten es zwei gewesen sein, entschuldigen wir uns dafür" +
+					log.setValue("Bitte geben Sie 2 Adressen ein. Sollten es zwei gewesen sein, entschuldigen wir uns" +
 						", dass SAP Textanalyse die eine Adresse nicht erkannt hat.\n\n" +
-						"SAP hat leider Probleme wenn der Straße mit Str. abgekürtzt wird, es sich um einen Platz handelt (Alexanderplatz)" +
-						" oder eine Allee, die getrennt geschrieben wird (Märkische Allee), dann erkennt es SAP " +
+						"SAP hat leider Probleme wenn eine Straße mit - Str.- abgekürtzt wird, es sich um einen Platz (z.B. Alexanderplatz)" +
+						" oder eine Allee (z.B. Märkische Allee) handelt. SAP erkennt die Eingabe " +
 						"trotz deutscher Konfiguration nicht immer." +
 						"");
 				}else {

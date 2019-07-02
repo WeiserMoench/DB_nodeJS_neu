@@ -326,7 +326,7 @@ function importEdgeFromFile( url) {
 
 }
 
-//Methode läd alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Nodes" im Benutzer U558587 ein
+//Methode lädt alle S und U Haltestellen Berlins herunter und fügt sie in die Datenbanktabelle "Edges" im Benutzer U558587 ein
 app.get('/importEdges', (req, res, next) => {
 
   importEdgeFromFile( 'http://127.0.0.1:8081/ressources/linien/s_bahn_linien.txt');
@@ -381,7 +381,7 @@ app.get('/testShortestPath', (req, res, next) => {
 //    console.log(" Zähler i in for Schleife " + i );
     console.log(line);
     //console.console.log(" Teilstreckendistanz: " + total_distance);
-    total_route += line + result[i]["start_name"] + ", Distanz zur vorherigen Station: " + result[i]["distance"] + " m" +"\n";
+    total_route += line + result[i]["start_name"] + " *** Distanz zur naechsten Station: " + result[i]["distance"] + " m" +"\n";
     if( i<result.length-1 && result[i]["line"] != result[i+1]["line"]){
       total_route += "\nBitte Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] + "\n\n";
       console.log( "Umsteigen bei " + result[i]["line"] + " zu " + result[i+1]["line"] + " an der Station " + result[i]["end_name"] );
@@ -451,4 +451,3 @@ app.get('/textanalyse', (req, res, next) => {
     });
 
 });
-
