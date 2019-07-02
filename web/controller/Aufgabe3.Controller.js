@@ -143,121 +143,129 @@ sap.ui.define(["de/htwberlin/adbkt/basic1/controller/BaseController",
             type: 'GET',
 						// adresses_start_end = Rueckgabe der Textanalyse
             success: function( addresses_start_end) {
-            	alert(addresses_start_end);
 
-				if (addresses_start_end.length() == 1) {
+				if (addresses_start_end.length == 1) {
+					sap.m.MessageToast.show("fehlerhafte Eingabe, bitte die Ausgabe beachten");
 					alert(addresses_start_end);
+					var log = self.getView().byId('log');
+					log.setValue("Bitte gebe 2 Adressen ein, sollten es zwei gewesen sein, entschuldigen wir uns dafür" +
+						", dass SAP Textanalyse die eine Adresse nicht erkannt hat.\n\n" +
+						"SAP hat leider Probleme wenn der Straße mit Str. abgekürtzt wird, es sich um einen Platz handelt (Alexanderplatz)" +
+						" oder eine Allee, die getrennt geschrieben wird (Märkische Allee), dann erkennt es SAP " +
+						"trotz deutscher Konfiguration nicht immer." +
+						"");
+				}else {
+					$.ajax({
+						url: 'https://geocoder.api.here.com/6.2/geocode.json',
+						type: 'GET',
+						dataType: 'jsonp',
+						jsonp: 'jsoncallback',
+						data: {
+							searchtext: addresses_start_end[0] + ", Berlin",
+							app_id: Cred.getHereAppId(),
+							app_code: Cred.getHereAppCode(),
+							gen: '9'
+						},
+						success: function (latlngstart) {
+
+
+							var latstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+							var lngstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+
+							$.ajax({
+								url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+								type: 'GET',
+								dataType: 'jsonp',
+								jsonp: 'callbackFunc',
+								data: {
+									center: latstart + "," + lngstart,
+									radius: '3000',
+									app_id: Cred.getHereAppId(),
+									app_code: Cred.getHereAppCode(),
+									max: '20'
+								},
+								success: function (stations_start) {
+
+									//Start-Haltestelle
+									var stnname_start = self.processResponseNextStation(stations_start);
+
+									$.ajax({
+										url: 'https://geocoder.api.here.com/6.2/geocode.json',
+										type: 'GET',
+										dataType: 'jsonp',
+										jsonp: 'jsoncallback',
+										data: {
+											searchtext: addresses_start_end[1] + ", Berlin",
+											app_id: Cred.getHereAppId(),
+											app_code: Cred.getHereAppCode(),
+											gen: '9'
+										},
+										success: function (latlngend) {
+
+
+											var latend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
+											var lngend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
+
+											$.ajax({
+												url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
+												type: 'GET',
+												dataType: 'jsonp',
+												jsonp: 'callbackFunc',
+												data: {
+													center: latend + "," + lngend,
+													radius: '3000',
+													app_id: Cred.getHereAppId(),
+													app_code: Cred.getHereAppCode(),
+													max: '20'
+												},
+												success: function (stations_end) {
+
+													//Ziel-Haltestelle
+													var stnname_end = self.processResponseNextStation(stations_end);
+
+													var log = self.getView().byId('log');
+													log.setValue(stnname_start + " -> " + stnname_end);
+
+													// Uebermittlung an find-shortest-path in srv.js
+													$.ajax({
+														url: `http://127.0.0.1:3000/testShortestPath?stnname_start=${stnname_start}&stnname_end=${stnname_end}`,
+														type: 'GET',
+
+														success: function (data) {
+															var log = self.getView().byId('log');
+															sap.m.MessageToast.show("Berechnung der Route war erfolgreich");
+															//sap.m.MessageToast.show( data);
+															log.setValue(data);
+														},
+														error: function (jqXHR, textStatus, errorThrown) {
+															sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
+														}
+													})
+
+												},
+												failure: function (err) {
+													alert(JSON.stringify(err));
+												}
+											});
+
+										},
+										error: function (jqXHR, textStatus, errorThrown) {
+											alert("Error.");
+										}
+									})
+
+								},
+								failure: function (err) {
+									alert(JSON.stringify(err));
+								}
+							});
+
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							alert("Error.");
+						}
+					})
 				}
-				$.ajax({
-					url: 'https://geocoder.api.here.com/6.2/geocode.json',
-					type: 'GET',
-					dataType: 'jsonp',
-					jsonp: 'jsoncallback',
-					data: {
-						searchtext: addresses_start_end[0] + ", Berlin",
-						app_id: Cred.getHereAppId(),
-						app_code: Cred.getHereAppCode(),
-						gen: '9'
-					},
-					success: function (latlngstart) {
-
-
-						var latstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-						var lngstart = latlngstart.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
-
-						$.ajax({
-							url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
-							type: 'GET',
-							dataType: 'jsonp',
-							jsonp: 'callbackFunc',
-							data: {
-								center: latstart + "," + lngstart,
-								radius: '3000',
-								app_id: Cred.getHereAppId(),
-								app_code: Cred.getHereAppCode(),
-								max: '20'
-							},
-							success: function (stations_start) {
-
-								//Start-Haltestelle
-								var stnname_start = self.processResponseNextStation(stations_start);
-
-								$.ajax({
-									url: 'https://geocoder.api.here.com/6.2/geocode.json',
-									type: 'GET',
-									dataType: 'jsonp',
-									jsonp: 'jsoncallback',
-									data: {
-										searchtext: addresses_start_end[1] + ", Berlin",
-										app_id: Cred.getHereAppId(),
-										app_code: Cred.getHereAppCode(),
-										gen: '9'
-									},
-									success: function (latlngend) {
-
-
-										var latend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Latitude;
-										var lngend = latlngend.Response.View["0"].Result["0"].Location.DisplayPosition.Longitude;
-
-										$.ajax({
-											url: 'https://transit.api.here.com/v3/stations/by_geocoord.json',
-											type: 'GET',
-											dataType: 'jsonp',
-											jsonp: 'callbackFunc',
-											data: {
-												center: latend + "," + lngend,
-												radius: '3000',
-												app_id: Cred.getHereAppId(),
-												app_code: Cred.getHereAppCode(),
-												max: '20'
-											},
-											success: function (stations_end) {
-
-												//Ziel-Haltestelle
-												var stnname_end = self.processResponseNextStation(stations_end);
-
-												var log = self.getView().byId('log');
-												log.setValue(stnname_start + " -> " + stnname_end);
-
-												// Uebermittlung an find-shortest-path in srv.js
-												$.ajax({
-													url: `http://127.0.0.1:3000/testShortestPath?stnname_start=${stnname_start}&stnname_end=${stnname_end}`,
-													type: 'GET',
-
-													success: function (data) {
-														var log = self.getView().byId('log');
-														sap.m.MessageToast.show("Berechnung der Route war erfolgreich");
-														//sap.m.MessageToast.show( data);
-														log.setValue(data);
-													},
-													error: function (jqXHR, textStatus, errorThrown) {
-														sap.m.MessageToast.show(textStatus + '\n' + jqXHR + '\n' + errorThrown);
-													}
-												})
-
-											},
-											failure: function (err) {
-												alert(JSON.stringify(err));
-											}
-										});
-
-									},
-									error: function (jqXHR, textStatus, errorThrown) {
-										alert("Error.");
-									}
-								})
-
-							},
-							failure: function (err) {
-								alert(JSON.stringify(err));
-							}
-						});
-
-					},
-					error: function (jqXHR, textStatus, errorThrown) {
-						alert("Error.");
-					}
-				})
 
 				// var log = self.getView().byId('log');
 					// log.setValue( "E" + JSON.stringify(data[0], null, 2));

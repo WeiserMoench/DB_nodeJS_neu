@@ -432,7 +432,7 @@ app.get('/textanalyse', (req, res, next) => {
             const addressRows = rows.filter(row => row.TYPE == 'ADDRESS1');
             if (addressRows.length != 2) {
                 var msg =[];
-                msg.push("Bitte zwei Adressen eingeben, sollten es zwei gewesen sein, kann SAP Textanalyse die eine nicht erkennen.");
+                msg.push("Bitte zwei Adressen eingeben. Sollten es zwei Adressen gewesen sein, kann SAP Textanalyse die eine Adresse nicht erkennen.");
                 res.type('application/json').send(msg);
                 console.log(addressRows.length + " addresses were given. Only 2 allowed!")
             } else {
