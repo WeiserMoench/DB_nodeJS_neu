@@ -1,5 +1,5 @@
-# DB_nodeJS_neu
-Ausgewählte Datenbankkonzepte/-techniken
+# Aufgabe des Kurses ausgewählte ausgewählte Datenbankkonzepte/-techniken an der HTW Berlin 2020
+
 
 Dieses ist das Resporitory der DB Gruppe Kristina Spiegel und Christian Fiebelkorn.
 
